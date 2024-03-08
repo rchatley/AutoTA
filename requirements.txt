@@ -1,1 +1,1 @@
-openai==1.8.0
+javalang==0.13.0
