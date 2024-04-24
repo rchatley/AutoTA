@@ -1,14 +1,17 @@
 import os
 
-from TraversalRule import TraversalRule
+from Rules.Semantic.EncapsulationRule import EncapsulationRule
+from Rules.Semantic.IndentifierRule import IdentifierRule
 from ReviewFile import ReviewFile
 
 
 def get_task_spec(task_num):
     if task_num == 1:
-        return [TraversalRule('identifier', node_type='method', scope=('dir', 'SED3/src/test'),
-                              metadata={'pattern': r"^test"}),
-                TraversalRule('encapsulation', node_type="class", scope=('file', 'RecentlyUsedList.java'))]
+        return [IdentifierRule(r"^test", scope=('dir', 'SED3/src/test'),
+                               node_info={'annotation': None, 'modifiers': None, 'node': 'method'},
+                               rule_modifiers={'positivity': False, 'frequency': 'every'}),
+                EncapsulationRule(scope=('file', 'RecentlyUsedList.java'),
+                                  rule_modifiers={'positivity': False, 'frequency': 'every'})]
 
 
 def get_review_files(directory):
@@ -25,13 +28,13 @@ def get_review_files(directory):
     return review_files
 
 
-def traverse_files(traversal_files, traversal_rules):
+def traverse_files(traversal_files, spec_rules):
     traversal_feedback = {}
 
     for review_file in traversal_files:
         file_feedback = []
-        for rule in traversal_rules:
-            file_feedback += rule.traversal_function(review_file)
+        for spec_rule in spec_rules:
+            file_feedback += spec_rule.rule(review_file)
         if file_feedback:
             traversal_feedback[review_file] = file_feedback
     return traversal_feedback
