@@ -1,59 +1,61 @@
 import os
 
-from Rules.Semantic.EncapsulationRule import EncapsulationRule
-from Rules.Semantic.IndentifierRule import IdentifierRule
-from ReviewFile import ReviewFile
+from review_tools.ReviewFile import ReviewFile
+from review_tools.ReviewProject import ReviewProject
+from review_tools.rules.Design.Strategy import check_for_strategy_pattern
+from review_tools.rules.Design.TemplateMethod import check_for_template_method_pattern
+from review_tools.rules.Simple.EncapsulationRule import EncapsulationRule
+from review_tools.rules.Simple.IndentifierRule import IdentifierRule
 
 
-def get_task_spec(task_num):
-    if task_num == 1:
-        return [IdentifierRule(r"^test", scope=('dir', 'SED3/src/test'),
-                               node_info={'annotation': None, 'modifiers': None, 'node': 'method'},
-                               rule_modifiers={'positivity': False, 'frequency': 'every'}),
-                EncapsulationRule(scope=('file', 'RecentlyUsedList.java'),
-                                  rule_modifiers={'positivity': False, 'frequency': 'every'})]
+def get_task_spec(task_number, task_language):
+    java_spec_dict = {1: [EncapsulationRule(), IdentifierRule(node_annotations=['Test'], node_name=r"^test")]}
+    python_spec_dict = {1: 'N/A'}
+    lang_spec_dict = {'java': java_spec_dict, 'python': python_spec_dict}
+
+    return lang_spec_dict[task_language][task_number]
 
 
-def get_review_files(directory):
+def get_review_project(task_directory, task_language):
     review_files = []
 
-    for root, _, dir_files in os.walk(directory):
+    for root, _, dir_files in os.walk(task_directory):
         for file_name in dir_files:
-            if file_name.endswith('.java'):
-                filepath = os.path.join(root, file_name)
-                with open(filepath, 'r') as file:
-                    source_code = file.read()
-                review_files.append(ReviewFile(root, file_name, source_code))
+            if file_name.endswith(f'.{task_language}'):
+                review_files.append(ReviewFile(root, file_name))
 
-    return review_files
+    review_project = ReviewProject(task_language, review_files)
 
-
-def traverse_files(traversal_files, spec_rules):
-    traversal_feedback = {}
-
-    for review_file in traversal_files:
-        file_feedback = []
-        for spec_rule in spec_rules:
-            file_feedback += spec_rule.rule(review_file)
-        if file_feedback:
-            traversal_feedback[review_file] = file_feedback
-    return traversal_feedback
+    return review_project
 
 
 if __name__ == "__main__":
-    java_source_directory = "SED3"
-    task_spec = get_task_spec(1)
 
-    files = get_review_files(java_source_directory)
-    feedback = traverse_files(files, task_spec)
+    if True:
+        task_num = 1
+        task_lang = 'java'
+        task_dir = f'sample_repos/{task_lang}/SED{task_num}/'
 
-    feedback_string = ''
-    for problem_files in feedback.keys():
-        if feedback[problem_files]:
-            feedback_string += problem_files.file_name + '\n'
-            feedback_string += '==============' + '\n'
-            for line in feedback[problem_files]:
-                if line != '':
-                    feedback_string += line + '\n'
+        task_rules = get_task_spec(task_num, task_lang)
+        project = get_review_project(task_dir, task_lang)
 
-    print(feedback_string)
+        for file in project.files:
+            for spec in task_rules:
+                for instance in spec.rule(file):
+                    print(instance)
+    elif False:
+
+        task_lang = 'java'
+        task_dir = f'sample_repos/{task_lang}/TemplateMethodExample/'
+
+        project = get_review_project(task_dir, task_lang)
+
+        check_for_template_method_pattern(project.files)
+    else:
+
+        task_lang = 'java'
+        task_dir = f'sample_repos/{task_lang}/StrategyExample/'
+
+        project = get_review_project(task_dir, task_lang)
+
+        check_for_strategy_pattern(project.files)
