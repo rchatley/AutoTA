@@ -1,5 +1,3 @@
-import re
-
 from review_tools.rules.JavaFilter import get_instances_of
 from review_tools.rules.Simple.SimpleRule import SimpleRule
 

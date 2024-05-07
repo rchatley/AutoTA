@@ -18,8 +18,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8
       - name: Run Flake8
-        run: |
-          flake8 .
+        run: flake8 --exclude=sample_repos/ .
   build-request:
     runs-on: ubuntu-latest
     steps:

@@ -22,10 +22,10 @@ def build_filter(scope):
     scope_type, scope = scope
     if scope_type == 'dir':
         def filter_files(review_file):
-            root, filename = review_file.root, review_file.file_name
             directory_path = os.path.normpath(scope)
             if os.path.commonpath(
-                    [os.path.normpath(root), directory_path]) == directory_path:
+                    [os.path.normpath(review_file.root),
+                     directory_path]) == directory_path:
                 return review_file.ast
             else:
                 return None

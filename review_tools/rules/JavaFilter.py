@@ -72,11 +72,11 @@ def filter_node_implements(node, node_implements):
 def passes_filter(node, node_class, node_name, node_modifiers, node_annotations,
                   node_extends, node_implements):
     return isinstance(node, class_map[node_class]) and filter_node_name(node,
-                                                                        node_name) and filter_node_modifiers(
+                                        node_name) and filter_node_modifiers(
         node,
         node_modifiers) and filter_node_annotations(
         node, node_annotations) and filter_node_extends(node,
-                                                        node_extends) and filter_node_implements(
+                                    node_extends) and filter_node_implements(
         node, node_implements)
 
 

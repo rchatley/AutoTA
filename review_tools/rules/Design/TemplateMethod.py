@@ -29,7 +29,7 @@ def check_for_template_method_pattern(files):
                 method_dict = {}
                 for method in non_abstract_methods:
                     for invocation in get_instances_of(method,
-                                                       node_class='method_invocation'):
+                                            node_class='method_invocation'):
                         if invocation.member in abstract_method_names:
                             add_node_to_dict(method_dict, method.name,
                                              invocation.member)
