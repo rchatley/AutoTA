@@ -2,8 +2,11 @@ import re
 
 from javalang import tree
 
-class_map = {'node': tree.Node, 'class': tree.ClassDeclaration, 'method': tree.MethodDeclaration,
-             'method_invocation': tree.MethodInvocation, 'field': tree.FieldDeclaration,
+class_map = {'node': tree.Node,
+             'class': tree.ClassDeclaration,
+             'method': tree.MethodDeclaration,
+             'method_invocation': tree.MethodInvocation,
+             'field': tree.FieldDeclaration,
              'interface': tree.InterfaceDeclaration}
 
 
@@ -66,17 +69,23 @@ def filter_node_implements(node, node_implements):
     return set(node_implements).issubset(set(implements_names))
 
 
-def passes_filter(node, node_class, node_name, node_modifiers, node_annotations, node_extends, node_implements):
-    return isinstance(node, class_map[node_class]) and filter_node_name(node, node_name) and filter_node_modifiers(node,
-                                                                                                                   node_modifiers) and filter_node_annotations(
+def passes_filter(node, node_class, node_name, node_modifiers, node_annotations,
+                  node_extends, node_implements):
+    return isinstance(node, class_map[node_class]) and filter_node_name(node,
+                                                                        node_name) and filter_node_modifiers(
+        node,
+        node_modifiers) and filter_node_annotations(
         node, node_annotations) and filter_node_extends(node,
-                                                        node_extends) and filter_node_implements(node, node_implements)
+                                                        node_extends) and filter_node_implements(
+        node, node_implements)
 
 
-def get_instances_of(ast, node_class='node', node_name=None, node_modifiers=None, node_annotations=None,
+def get_instances_of(ast, node_class='node', node_name=None,
+                     node_modifiers=None, node_annotations=None,
                      node_extends=None, node_implements=None):
     instances = [node for _, node in ast if
-                 passes_filter(node, node_class, node_name, node_modifiers, node_annotations, node_extends,
+                 passes_filter(node, node_class, node_name, node_modifiers,
+                               node_annotations, node_extends,
                                node_implements)]
 
     return instances

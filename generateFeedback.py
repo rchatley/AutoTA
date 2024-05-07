@@ -3,13 +3,16 @@ import os
 from review_tools.ReviewFile import ReviewFile
 from review_tools.ReviewProject import ReviewProject
 from review_tools.rules.Design.Strategy import check_for_strategy_pattern
-from review_tools.rules.Design.TemplateMethod import check_for_template_method_pattern
+from review_tools.rules.Design.TemplateMethod import \
+    check_for_template_method_pattern
 from review_tools.rules.Simple.EncapsulationRule import EncapsulationRule
 from review_tools.rules.Simple.IndentifierRule import IdentifierRule
 
 
 def get_task_spec(task_number, task_language):
-    java_spec_dict = {1: [EncapsulationRule(), IdentifierRule(node_annotations=['Test'], node_name=r"^test")]}
+    java_spec_dict = {1: [EncapsulationRule(),
+                          IdentifierRule(node_annotations=['Test'],
+                                         node_name=r"^test")]}
     python_spec_dict = {1: 'N/A'}
     lang_spec_dict = {'java': java_spec_dict, 'python': python_spec_dict}
 

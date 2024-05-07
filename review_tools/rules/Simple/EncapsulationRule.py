@@ -15,9 +15,12 @@ class EncapsulationRule(SimpleRule):
             classes = get_instances_of(ast, node_class='class')
             for ast_class in classes:
                 class_fields = get_instances_of(ast_class, node_class='field')
-                encapsulated_fields = get_instances_of(ast_class, node_class='field',
-                                                       node_modifiers=['private', 'final'])
-                unencapsulated_fields.extend([field for field in class_fields if field not in encapsulated_fields])
+                encapsulated_fields = get_instances_of(ast_class,
+                                                       node_class='field',
+                                                       node_modifiers=[
+                                                           'private', 'final'])
+                unencapsulated_fields.extend([field for field in class_fields if
+                                              field not in encapsulated_fields])
 
             return unencapsulated_fields
 

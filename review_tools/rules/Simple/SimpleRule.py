@@ -24,7 +24,8 @@ def build_filter(scope):
         def filter_files(review_file):
             root, filename = review_file.root, review_file.file_name
             directory_path = os.path.normpath(scope)
-            if os.path.commonpath([os.path.normpath(root), directory_path]) == directory_path:
+            if os.path.commonpath(
+                    [os.path.normpath(root), directory_path]) == directory_path:
                 return review_file.ast
             else:
                 return None
