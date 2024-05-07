@@ -19,8 +19,9 @@ class EncapsulationRule(SimpleRule):
                                                        node_class='field',
                                                        node_modifiers=[
                                                            'private', 'final'])
-                unencapsulated_fields.extend([field for field in class_fields if
-                                              field not in encapsulated_fields])
+                unencapsulated_fields.extend(
+                    [field for field in class_fields if
+                     field not in encapsulated_fields])
 
             return unencapsulated_fields
 

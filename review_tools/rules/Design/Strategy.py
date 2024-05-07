@@ -40,7 +40,7 @@ def check_for_strategy_pattern(files):
     if len(strategy_node_candidates) == 0:
         return False
     concrete_strategy_node_candidates = get_concrete_strategy_candidates(files,
-                                                    strategy_node_candidates)
+                                                                         strategy_node_candidates)
 
     # Find Context
 
