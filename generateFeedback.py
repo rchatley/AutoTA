@@ -2,9 +2,7 @@ import os
 
 from review_tools.ReviewFile import ReviewFile
 from review_tools.ReviewProject import ReviewProject
-from review_tools.rules.Design.Strategy import check_for_strategy_pattern
-from review_tools.rules.Design.TemplateMethod import \
-    check_for_template_method_pattern
+from review_tools.rules import DesignPattern
 from review_tools.rules.Simple.EncapsulationRule import EncapsulationRule
 from review_tools.rules.Simple.IndentifierRule import IdentifierRule
 
@@ -34,7 +32,7 @@ def get_review_project(task_directory, task_language):
 
 if __name__ == "__main__":
 
-    if True:
+    if False:
         task_num = 1
         task_lang = 'java'
         task_dir = f'sample_repos/{task_lang}/SED{task_num}/'
@@ -46,6 +44,15 @@ if __name__ == "__main__":
             for spec in task_rules:
                 for instance in spec.rule(file):
                     print(instance)
+    elif True:
+
+        task_lang = 'java'
+        task_dir = f'sample_repos/{task_lang}/SED/4/'
+
+        project = get_review_project(task_dir, task_lang)
+
+        print(DesignPattern.find_pattern('singleton', project))
+
     elif False:
 
         task_lang = 'java'
@@ -53,7 +60,7 @@ if __name__ == "__main__":
 
         project = get_review_project(task_dir, task_lang)
 
-        check_for_template_method_pattern(project.files)
+        print(DesignPattern.find_pattern('template', project))
     else:
 
         task_lang = 'java'
@@ -61,4 +68,4 @@ if __name__ == "__main__":
 
         project = get_review_project(task_dir, task_lang)
 
-        check_for_strategy_pattern(project.files)
+        DesignPattern.find_pattern('strategy', project)

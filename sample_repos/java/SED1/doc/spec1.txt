@@ -1,6 +1,0 @@
-Encapsulation is not broken - internal state is not revealed for the purposes of testing.
-Each test is as simple as it could be, testing a single behaviour.
-Test use JUnit assertion functions, not the assert keyword.
-Each test should be named as a fact about the behaviour. The name should not start with “test” or
-“should” or “check”. The name should not describe the test scenario, it should describe the behaviour.
-The list is generic in T (can be instantiated for different element types) and a test drives this out.

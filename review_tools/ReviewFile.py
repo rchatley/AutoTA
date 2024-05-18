@@ -29,7 +29,7 @@ class ReviewFile:
         elif extension == '.java':
             self.tokens = list(tokenizer.tokenize(self.contents))
             self.ast = Parser(self.tokens).parse()
-            self.public_nodes = self.get_public_nodes()
+            #self.public_nodes = self.get_public_nodes()
         else:
             self.ast = None
 
