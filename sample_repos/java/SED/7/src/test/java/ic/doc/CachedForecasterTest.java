@@ -4,20 +4,22 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Test;
 
-public class BasicForecastGeneratorTest {
-
+public class CachedForecasterTest {
 
   Mockery context = new Mockery();
   ForecastGenerator forecaster = context.mock(ForecastGenerator.class);
 
   @Test
   public void forecastForCallsCorrectMethod() {
-    ForecastGenerator generator = new BasicForecastGenerator(forecaster);
+    ForecastGenerator generator = new CachedForecaster(forecaster, 10);
 
     context.checking(new Expectations() {{
-      exactly(1).of(forecaster).forecastFor(WeatherRegion.LONDON, WeatherDay.MONDAY);
-      exactly(1).of(forecaster).forecastFor(WeatherRegion.BIRMINGHAM, WeatherDay.WEDNESDAY);
-      exactly(1).of(forecaster).forecastFor(WeatherRegion.SOUTH_EAST_ENGLAND, WeatherDay.SUNDAY);
+      exactly(1).of(forecaster).forecastFor(
+              WeatherRegion.LONDON, WeatherDay.MONDAY);
+      exactly(1).of(forecaster).forecastFor(
+              WeatherRegion.BIRMINGHAM, WeatherDay.WEDNESDAY);
+      exactly(1).of(forecaster).forecastFor(
+              WeatherRegion.SOUTH_EAST_ENGLAND, WeatherDay.SUNDAY);
     }});
 
     generator.forecastFor(WeatherRegion.LONDON, WeatherDay.MONDAY);
@@ -27,11 +29,11 @@ public class BasicForecastGeneratorTest {
   }
 
   @Test
-  public void forecastForCallsThrice() {
-    ForecastGenerator generator = new BasicForecastGenerator(forecaster);
+  public void forecastForCallsOnlyOnce() {
+    ForecastGenerator generator = new CachedForecaster(forecaster, 10);
 
     context.checking(new Expectations() {{
-      exactly(3).of(forecaster).forecastFor(WeatherRegion.LONDON, WeatherDay.MONDAY);
+      exactly(1).of(forecaster).forecastFor(WeatherRegion.LONDON, WeatherDay.MONDAY);
     }});
 
 
@@ -39,5 +41,5 @@ public class BasicForecastGeneratorTest {
     generator.forecastFor(WeatherRegion.LONDON, WeatherDay.MONDAY);
     generator.forecastFor(WeatherRegion.LONDON, WeatherDay.MONDAY);
   }
-
 }
+

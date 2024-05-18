@@ -6,86 +6,116 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 public class BookSearchQueryTest {
 
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery();
-  private final Catalogue catalogue = context.mock(Catalogue.class);
-  private final BookSearchQueryBuilder builder = new BookSearchQueryBuilder(catalogue);
+
+  Catalogue catalogue = context.mock(Catalogue.class);
+
+  BookSearchQueryBuilder builder = new BookSearchQueryBuilder(catalogue);
+  List<Book> books;
 
   @Test
   public void searchesForBooksInLibraryCatalogueByAuthorSurname() {
-    final String surname = "dickens";
-    context.checking(new Expectations() {{
-      oneOf(catalogue).searchFor("LASTNAME='" + surname + "' ");
-    }});
+    context.checking(
+            new Expectations() {
+              {
+                exactly(1).of(catalogue).searchFor("LASTNAME='dickens' ");
+              }
+            });
 
-    builder.withSurname(surname).build().execute();
+    books = builder.withLastName("dickens").build().execute();
   }
 
   @Test
   public void searchesForBooksInLibraryCatalogueByAuthorFirstname() {
-    final String firstname = "Jane";
-    context.checking(new Expectations() {{
-      oneOf(catalogue).searchFor("FIRSTNAME='" + firstname + "' ");
-    }});
+    context.checking(
+            new Expectations() {
+              {
+                exactly(1).of(catalogue).searchFor("FIRSTNAME='Jane' ");
+                will(
+                        returnValue(
+                                List.of(
+                                        new Book("Pride and Prejudice", "Jane Austen", 1813),
+                                        new Book("Pride and Prejudice", "Jane Austen", 1813))));
+              }
+            });
 
-    builder.withFirstname(firstname).build().execute();
+    books = builder.withFirstName("Jane").build().execute();
+
+    assertThat(books.size(), is(2));
+    assertTrue(books.get(0).matchesAuthor("Austen"));
   }
 
   @Test
   public void searchesForBooksInLibraryCatalogueByTitle() {
-    final String title = "Two Cities";
-    context.checking(new Expectations() {{
-      oneOf(catalogue).searchFor("TITLECONTAINS(" + title + ") ");
-    }});
+    context.checking(
+            new Expectations() {
+              {
+                exactly(1).of(catalogue).searchFor("TITLECONTAINS(Two Cities) ");
+              }
+            });
 
-    builder.withTitle(title).build().execute();
+    builder.containingTitle("Two Cities").build().execute();
   }
 
   @Test
   public void searchesForBooksInLibraryCatalogueBeforeGivenPublicationYear() {
-    final int latestDate = 1700;
-    context.checking(new Expectations() {{
-      oneOf(catalogue).searchFor("PUBLISHEDBEFORE(" + latestDate + ") ");
-    }});
+    context.checking(
+            new Expectations() {
+              {
+                exactly(1).of(catalogue).searchFor("PUBLISHEDBEFORE(1700) ");
+              }
+            });
 
-    builder.withLatestDate(latestDate).build().execute();
+    builder.publishedBefore(1700).build().execute();
   }
 
   @Test
   public void searchesForBooksInLibraryCatalogueAfterGivenPublicationYear() {
-    final int earliestDate = 1950;
-    context.checking(new Expectations() {{
-      oneOf(catalogue).searchFor("PUBLISHEDAFTER(" + earliestDate + ") ");
-    }});
 
-    builder.withEarliestDate(earliestDate).build().execute();
+    context.checking(
+            new Expectations() {
+              {
+                exactly(1).of(catalogue).searchFor("PUBLISHEDAFTER(1950) ");
+              }
+            });
+
+    builder.publishedAfter(1950).build().execute();
   }
 
   @Test
   public void searchesForBooksInLibraryCatalogueWithCombinationOfParameters() {
-    final String surname = "dickens";
-    final int latestDate = 1840;
-    context.checking(new Expectations() {{
-      oneOf(catalogue).searchFor("LASTNAME='" + surname + "' PUBLISHEDBEFORE(" + latestDate + ") ");
-    }});
 
-    builder.withSurname(surname).withLatestDate(latestDate).build().execute();
+    context.checking(
+            new Expectations() {
+              {
+                exactly(1).of(catalogue).searchFor("LASTNAME='dickens' PUBLISHEDBEFORE(1840) ");
+              }
+            });
+
+    builder.withLastName("dickens").publishedBefore(1840).build().execute();
   }
 
   @Test
   public void searchesForBooksInLibraryCatalogueWithCombinationOfTitleAndOtherParameters() {
-    final String title = "of";
-    final int earliestDate = 1800;
-    final int latestDate = 2000;
-    context.checking(new Expectations() {{
-      oneOf(catalogue).searchFor(
-          "TITLECONTAINS(" + title + ") PUBLISHEDAFTER(" + earliestDate + ") PUBLISHEDBEFORE("
-              + latestDate + ") ");
-    }});
 
-    builder.withTitle(title).withEarliestDate(earliestDate).withLatestDate(latestDate).build()
-        .execute();
+    context.checking(
+            new Expectations() {
+              {
+                exactly(1)
+                        .of(catalogue)
+                        .searchFor("TITLECONTAINS(of) PUBLISHEDAFTER(1800) PUBLISHEDBEFORE(2000) ");
+              }
+            });
+
+    builder.containingTitle("of").publishedAfter(1800).publishedBefore(2000).build().execute();
   }
 }

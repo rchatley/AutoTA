@@ -3,54 +3,43 @@ package ic.doc;
 import ic.doc.catalogues.Catalogue;
 
 public class BookSearchQueryBuilder {
-
-  private String name1 = null;
-  private String name2 = null;
-  private String title = null;
-  private Integer date1 = null;
-  private Integer date2 = null;
+  private String firstName;
+  private String lastName;
+  private String title;
+  private Integer publishedAfterDate;
+  private Integer publishedBeforeDate;
   private final Catalogue catalogue;
 
-  public BookSearchQueryBuilder(final Catalogue catalogue) {
-    nullCheck(catalogue);
+  public BookSearchQueryBuilder(Catalogue catalogue) {
     this.catalogue = catalogue;
   }
 
-  private static void nullCheck(Object input) {
-    if (input == null) {
-      throw new IllegalArgumentException("Builder class does not accept null arguments!");
-    }
+  public BookSearchQuery build() {
+    return new BookSearchQuery(firstName, lastName, title, publishedAfterDate, publishedBeforeDate, catalogue);
   }
 
-  public BookSearchQueryBuilder withFirstname(final String firstname) {
-    nullCheck(firstname);
-    this.name1 = firstname;
+  public BookSearchQueryBuilder withFirstName(String firstName) {
+    this.firstName = firstName;
     return this;
   }
 
-  public BookSearchQueryBuilder withSurname(final String surname) {
-    nullCheck(surname);
-    this.name2 = surname;
+  public BookSearchQueryBuilder withLastName(String lastName) {
+    this.lastName = lastName;
     return this;
   }
 
-  public BookSearchQueryBuilder withTitle(final String title) {
-    nullCheck(title);
+  public BookSearchQueryBuilder containingTitle(String title) {
     this.title = title;
     return this;
   }
 
-  public BookSearchQueryBuilder withEarliestDate(final int earliestDate) {
-    this.date1 = earliestDate;
+  public BookSearchQueryBuilder publishedAfter(Integer minPublicationDate) {
+    this.publishedAfterDate = minPublicationDate;
     return this;
   }
 
-  public BookSearchQueryBuilder withLatestDate(final int latestDate) {
-    this.date2 = latestDate;
+  public BookSearchQueryBuilder publishedBefore(Integer maxPublicationDate) {
+    this.publishedBeforeDate = maxPublicationDate;
     return this;
-  }
-
-  public BookSearchQuery build() {
-    return new BookSearchQuery(name1, name2, title, date1, date2, catalogue);
   }
 }

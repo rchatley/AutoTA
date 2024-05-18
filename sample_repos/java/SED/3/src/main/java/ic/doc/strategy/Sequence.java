@@ -3,10 +3,18 @@ package ic.doc.strategy;
 import java.util.Iterator;
 
 public class Sequence implements Iterable<Integer> {
-    private final TermGenerator generator;
 
-    public Sequence(TermGenerator gen) {
-        generator = gen;
+    private final TermGenerator termGenerator;
+
+    public Sequence(TermGenerator termGenerator) {
+        this.termGenerator = termGenerator;
+    }
+
+    public int term(int i) {
+        if (i < 0) {
+            throw new IllegalArgumentException("Not defined for indices < 0");
+        }
+        return termGenerator.term(i);
     }
 
     public Iterator<Integer> iterator() {
@@ -24,12 +32,12 @@ public class Sequence implements Iterable<Integer> {
 
         @Override
         public Integer next() {
-            return generator.term(index++);
+            return term(index++);
         }
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException("remove is not implemented");
+            throw new UnsupportedOperationException("Remove is not implemented");
         }
     }
 }

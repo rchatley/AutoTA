@@ -1,6 +1,7 @@
 package ic.doc;
 
 import ic.doc.catalogues.Catalogue;
+
 import java.util.List;
 
 public class BookSearchQuery {
@@ -12,8 +13,7 @@ public class BookSearchQuery {
   private final Integer date2;
   private final Catalogue catalogue;
 
-  public BookSearchQuery(String p1, String p2, String p3, Integer p4, Integer p5,
-      Catalogue catalogue) {
+  public BookSearchQuery(String p1, String p2, String p3, Integer p4, Integer p5, Catalogue catalogue) {
     this.name1 = p1;
     this.name2 = p2;
     this.title = p3;

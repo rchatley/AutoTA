@@ -1,10 +1,10 @@
 package ic.doc;
 
-public class BasicForecastGenerator implements ForecastGenerator {
+public class BasicForecaster implements ForecastGenerator {
 
   private final ForecastGenerator forecaster;
 
-  public BasicForecastGenerator(ForecastGenerator forecaster) {
+  public BasicForecaster(ForecastGenerator forecaster) {
     this.forecaster = forecaster;
   }
 

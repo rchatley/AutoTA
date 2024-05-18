@@ -1,4 +1,4 @@
-package ic.doc.templatemethod;
+package ic.doc.strategy;
 
 import org.junit.Test;
 
@@ -8,22 +8,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.fail;
 
-public class TriangularNumbersSequenceTest {
+public class TriangleNumbersSequenceTest {
 
-    final TriangularNumberSequence sequence = new TriangularNumberSequence();
+    final Sequence sequence = new Sequence(new TriangleNumbersGenerator());
 
     @Test
     public void definesFirstTermToBeOne() {
-
         assertThat(sequence.term(0), is(1));
     }
 
     @Test
-    public void hasEachTermEqualTonPlusOnenPlusTwoOverTwo() {
+    public void definesSubsequentTermsToBeHalfOfTheProductOfNextTwoIndices() {
 
-        assertThat(sequence.term(2), is(6));
-        assertThat(sequence.term(3), is(10));
-        assertThat(sequence.term(4), is(15));
+        assertThat(sequence.term(1), is((2 * 3) / 2));
+        assertThat(sequence.term(2), is((3 * 4) / 2));
+        assertThat(sequence.term(3), is((4 * 5) / 2));
     }
 
     @Test
@@ -31,7 +30,7 @@ public class TriangularNumbersSequenceTest {
 
         try {
             sequence.term(-1);
-            fail("should have thrown exception");
+            fail("Should have thrown exception");
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("Not defined for indices < 0"));
         }
@@ -41,5 +40,4 @@ public class TriangularNumbersSequenceTest {
     public void canBeIteratedThrough() {
         assertThat(sequence, beginsWith(1, 3, 6, 10, 15));
     }
-
 }

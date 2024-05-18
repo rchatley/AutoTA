@@ -4,7 +4,15 @@ import java.util.Iterator;
 
 public abstract class Sequence implements Iterable<Integer> {
 
-    public abstract int term(int i);
+    public final int term(int i) {
+        if (i < 0) {
+            throw new IllegalArgumentException("Not defined for indices < 0");
+        }
+        return generate_term(i);
+    }
+
+
+    public abstract int generate_term(int i);
 
     public Iterator<Integer> iterator() {
         return new SequenceIterator();
@@ -26,7 +34,7 @@ public abstract class Sequence implements Iterable<Integer> {
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException("remove is not implemented");
+            throw new UnsupportedOperationException("Remove is not implemented");
         }
     }
 }

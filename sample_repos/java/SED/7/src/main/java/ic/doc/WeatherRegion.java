@@ -23,5 +23,3 @@ public enum WeatherRegion {
     return region;
   }
 }
-
-//public record WeatherRegion(Region region) {}

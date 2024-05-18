@@ -2,11 +2,11 @@ package ic.doc;
 
 import com.weather.Forecast;
 
-public class ForecastWrapper implements WeatherForecast {
+public class ForecastAdapter implements WeatherForecast {
 
   private final Forecast forecast;
 
-  public ForecastWrapper(Forecast forecast) {
+  public ForecastAdapter(Forecast forecast) {
     this.forecast = forecast;
   }
 

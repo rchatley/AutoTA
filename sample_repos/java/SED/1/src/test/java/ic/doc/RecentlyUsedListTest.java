@@ -1,13 +1,5 @@
 package ic.doc;
 
-// Tests to implement:
-// 1. The list should be empty when initialised.
-// 2. We should be able to add things to the list.
-// 3. We should be able to retrieve items from the list.
-// 4. The most recent item should be first in the list.
-// 5. Items in the list are unique, so duplicate insertions
-//    should be moved rather than added
-
 import org.junit.Test;
 
 import java.util.InputMismatchException;
@@ -30,19 +22,20 @@ public class RecentlyUsedListTest {
   // 2. We should be able to add things to the list.
   @Test
   public void ableToAddThingsToList() {
-    String item = "012345";
+    String item = "ITEM";
     testList.add(item);
+
     assertTrue(testList.contains(item));
   }
 
-  // Test the input type is strictly string
+  // Test that incorrect inputs are correctly ignored
   @Test
   public void inputTypeIsString() {
     boolean thrown = false;
     testList.add("This is a test");
     try {
       testList.add(100);
-      fail("should have thrown error");
+      fail("Should have thrown exception");
     } catch (InputMismatchException e) {
       thrown = true;
     }
@@ -52,8 +45,9 @@ public class RecentlyUsedListTest {
   // 3. We should be able to retrieve items from the list.
   @Test
   public void ableToRetrieveFromList() {
-    String item = "012345";
+    String item = "ITEM";
     testList.add(item);
+
     assertThat(testList.getItemAt(0), is(item));
   }
 
@@ -62,10 +56,11 @@ public class RecentlyUsedListTest {
     boolean thrown = false;
     try {
       testList.getItemAt(1);
-      fail("should have thrown exception");
+      fail("Should have thrown exception");
     } catch (ArrayIndexOutOfBoundsException e) {
       thrown = true;
     }
+
     assertTrue(thrown);
   }
 

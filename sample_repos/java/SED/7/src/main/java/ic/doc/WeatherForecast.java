@@ -5,5 +5,4 @@ public interface WeatherForecast {
   String summary();
 
   int temperature();
-
 }
