@@ -18,5 +18,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8
       - name: Run Flake8
-        run: flake8 --exclude=sample_repos/ .
+        run: flake8 --exclude=sed_repos/ .
         continue-on-error: true
