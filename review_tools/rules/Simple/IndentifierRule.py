@@ -1,4 +1,4 @@
-from review_tools.rules.filters.JavaFilter import JavaFilter
+from review_tools.filters.JavaFilter import JavaFilter
 from review_tools.rules.Simple.SimpleRule import SimpleRule
 
 
@@ -17,7 +17,7 @@ class IdentifierRule(SimpleRule):
         def traversal(ast):
             return JavaFilter(node_class=self.node_class,
                               node_name=self.node_name,
-                              node_annotations=self.node_annotations).get_instances_of(
+                              node_annotations=self.node_annotations).get_nodes(
                 ast)
 
         return traversal

@@ -1,5 +1,5 @@
 from review_tools.rules.Design.utils import add_node_to_dict
-from review_tools.rules.filters.JavaFilter import JavaFilter
+from review_tools.filters.JavaFilter import JavaFilter
 
 
 def find_pattern(files):
@@ -8,16 +8,16 @@ def find_pattern(files):
         # Get abstract classes
         abstract_classes = JavaFilter(node_class='class',
                                       node_modifiers=[
-                                          'abstract']).get_instances_of(
+                                          'abstract']).get_nodes(
             file.ast)
 
         for abstract_class in abstract_classes:
-            class_methods = JavaFilter(node_class='method').get_instances_of(
+            class_methods = JavaFilter(node_class='method').get_nodes(
                 abstract_class)
 
             abstract_methods = JavaFilter(node_class='method',
                                           node_modifiers=[
-                                              'abstract']).get_instances_of(
+                                              'abstract']).get_nodes(
                 abstract_class)
 
             non_abstract_methods = [method for method in class_methods if
@@ -29,7 +29,7 @@ def find_pattern(files):
                 method_dict = {}
                 for method in non_abstract_methods:
                     for invocation in JavaFilter(
-                            node_class='method_invocation').get_instances_of(
+                            node_class='method_invocation').get_nodes(
                         method):
                         if invocation.member in abstract_method_names:
                             add_node_to_dict(method_dict, method.name,
@@ -46,12 +46,12 @@ def find_pattern(files):
     for file in files:
         for tc in template_class_candidates.keys():
             extending_classes = JavaFilter(node_class='class',
-                                           node_extends=tc).get_instances_of(
+                                           node_extends=tc).get_nodes(
                 file.ast)
             for extending_class in extending_classes:
                 override_methods = JavaFilter(node_class='method',
                                               node_annotations=[
-                                                  'Override']).get_instances_of(
+                                                  'Override']).get_nodes(
                     extending_class)
                 override_method_names = [method.name for method in
                                          override_methods]

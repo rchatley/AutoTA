@@ -1,13 +1,13 @@
 from review_tools.rules.Design.utils import add_node_to_dict
-from review_tools.rules.filters.JavaFilter import JavaFilter
+from review_tools.filters.JavaFilter import JavaFilter
 
 
 def find_pattern(files):
     strategy_node_candidates = {}
     for file in files:
-        for interface in JavaFilter(node_class='interface').get_instances_of(
+        for interface in JavaFilter(node_class='interface').get_nodes(
                 file.ast):
-            methods = JavaFilter(node_class='method').get_instances_of(
+            methods = JavaFilter(node_class='method').get_nodes(
                 interface)
             if len(methods) > 0:
                 strategy_node_candidates[interface.name] = methods
@@ -21,7 +21,7 @@ def find_pattern(files):
 
             implementing_classes = JavaFilter(node_class='class',
                                               node_implements=[
-                                                  sn]).get_instances_of(
+                                                  sn]).get_nodes(
                 file.ast)
 
             if len(implementing_classes) > 0:
