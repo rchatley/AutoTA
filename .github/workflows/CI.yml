@@ -26,7 +26,7 @@ jobs:
           pip install flake8
 
       - name: Run Flake8
-        run: flake8 .
+        run: flake8 --exclude=sed_repos/, tests/test_repos/ .
         continue-on-error: true
 
   test:
