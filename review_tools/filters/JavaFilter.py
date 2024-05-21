@@ -11,6 +11,7 @@ class JavaFilter(Filter):
                  node_implements=None,
                  node_type=None, node_return_type=None):
         super().__init__('java')
+
         self.node_class = node_class
         self.node_name = node_name
         self.node_modifiers = node_modifiers

@@ -1,4 +1,4 @@
-name: Attempt to Run Code
+name: Run Code
 
 on:
   push:
