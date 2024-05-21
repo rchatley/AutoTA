@@ -1,4 +1,4 @@
-from review_tools.rules.Design.utils import add_node_to_dict
+from review_tools.rules.design_patterns.utils import add_node_to_dict
 from review_tools.filters.JavaFilter import JavaFilter
 
 

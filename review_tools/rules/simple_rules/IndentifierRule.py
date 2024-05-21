@@ -1,14 +1,12 @@
 from review_tools.filters.JavaFilter import JavaFilter
-from review_tools.rules.Simple.SimpleRule import SimpleRule
+from review_tools.rules.simple_rules.SimpleRule import SimpleRule
 
 
 class IdentifierRule(SimpleRule):
-    def __init__(self, scope='project', node_class='node', node_name='.*',
-                 node_annotations=None):
+    def __init__(self, scope='project', node_class='node', node_name='.*'):
         super().__init__(scope)
         self.node_name = node_name
         self.node_class = node_class
-        self.node_annotations = node_annotations
 
         self.traversal = self.build_traversal()
         self.rule = self.build_rule()
@@ -16,8 +14,7 @@ class IdentifierRule(SimpleRule):
     def build_traversal(self):
         def traversal(ast):
             return JavaFilter(node_class=self.node_class,
-                              node_name=self.node_name,
-                              node_annotations=self.node_annotations).get_nodes(
+                              node_name=self.node_name).get_nodes(
                 ast)
 
         return traversal

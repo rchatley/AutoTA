@@ -1,4 +1,4 @@
-from review_tools.rules.Simple.SimpleRule import SimpleRule
+from review_tools.rules.simple_rules.SimpleRule import SimpleRule
 from review_tools.filters.JavaFilter import JavaFilter
 
 

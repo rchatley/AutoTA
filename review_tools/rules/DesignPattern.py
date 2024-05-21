@@ -1,4 +1,4 @@
-from review_tools.rules.Design import StrategyPattern, TemplateMethodPattern, \
+from review_tools.rules.design_patterns import StrategyPattern, TemplateMethodPattern, \
     SingletonPattern
 
 pattern_dict = {'template': TemplateMethodPattern, 'strategy': StrategyPattern,

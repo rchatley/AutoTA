@@ -2,8 +2,8 @@ import os
 
 from review_tools.project.ReviewFile import ReviewFile
 from review_tools.project.ReviewProject import ReviewProject
-from review_tools.rules.Simple.EncapsulationRule import EncapsulationRule
-from review_tools.rules.Simple.IndentifierRule import IdentifierRule
+from review_tools.rules.simple_rules.EncapsulationRule import EncapsulationRule
+from review_tools.rules.simple_rules.IndentifierRule import IdentifierRule
 
 
 def get_task_spec(task_number, task_language):

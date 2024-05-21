@@ -1,5 +1,5 @@
-from review_tools.rules.Design.utils import add_node_to_dict
 from review_tools.filters.JavaFilter import JavaFilter
+from review_tools.rules.design_patterns.utils import add_node_to_dict
 
 
 def find_pattern(files):
@@ -29,8 +29,7 @@ def find_pattern(files):
                 method_dict = {}
                 for method in non_abstract_methods:
                     for invocation in JavaFilter(
-                            node_class='method_invocation').get_nodes(
-                        method):
+                            node_class='method_invocation').get_nodes(method):
                         if invocation.member in abstract_method_names:
                             add_node_to_dict(method_dict, method.name,
                                              invocation.member)
