@@ -1,35 +1,29 @@
-from review_tools.rules.JavaFilter import get_instances_of
+from review_tools.rules.filters.JavaFilter import JavaFilter
 
 
 def find_pattern(files):
     singletons = []
     for file in files:
         # Get classes
-        s_classes = get_instances_of(file.ast, node_class='class')
+        s_classes = JavaFilter(node_class='class').get_instances_of(file.ast)
         for s_class in s_classes:
-
-
             # Get private fields of type Class
-            # Get methods of type Class
-            # Get private constructors
-
-
-            class_fields = get_instances_of(s_class,
-                                            node_class='field',
-                                            node_modifiers=['private'],
-                                            node_type=s_class.name)
+            class_fields = JavaFilter(
+                node_class='field',
+                node_modifiers=['private'],
+                node_type=s_class.name).get_instances_of(s_class)
             if not class_fields:
                 continue
-
-            class_methods = get_instances_of(s_class,
-                                             node_class='method',
-                                             node_return_type=s_class.name)
+            # Get methods of type Class
+            class_methods = JavaFilter(
+                node_class='method',
+                node_return_type=s_class.name).get_instances_of(s_class)
             if not class_methods:
                 continue
-
-            private_constructors = get_instances_of(s_class,
-                                                    node_class='constructor',
-                                                    node_modifiers=['private'])
+            # Get private constructors
+            private_constructors = JavaFilter(
+                node_class='constructor',
+                node_modifiers=['private']).get_instances_of(s_class)
             if not private_constructors:
                 continue
             singletons.append(s_class.name)

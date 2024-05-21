@@ -1,4 +1,4 @@
-from review_tools.rules.JavaFilter import get_instances_of
+from review_tools.rules.filters.JavaFilter import JavaFilter
 from review_tools.rules.Simple.SimpleRule import SimpleRule
 
 
@@ -15,8 +15,9 @@ class IdentifierRule(SimpleRule):
 
     def build_traversal(self):
         def traversal(ast):
-            return get_instances_of(ast, node_class=self.node_class,
-                                    node_name=self.node_name,
-                                    node_annotations=self.node_annotations)
+            return JavaFilter(node_class=self.node_class,
+                              node_name=self.node_name,
+                              node_annotations=self.node_annotations).get_instances_of(
+                ast)
 
         return traversal
