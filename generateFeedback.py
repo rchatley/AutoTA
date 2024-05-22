@@ -2,13 +2,14 @@ import os
 
 from review_tools.project.ReviewFile import ReviewFile
 from review_tools.project.ReviewProject import ReviewProject
+from review_tools.rules.DesignPattern import find_pattern
 from review_tools.rules.simple_rules.EncapsulationRule import EncapsulationRule
 from review_tools.rules.simple_rules.IndentifierRule import IdentifierRule
 
 
 def get_task_spec(task_number, task_language):
     java_spec_dict = {1: [EncapsulationRule(),
-                          IdentifierRule(node_annotations=['Test'],
+                          IdentifierRule(annotations=['Test'],
                                          node_name=r"^test")],
                       3: None,
                       4: None,
@@ -51,6 +52,11 @@ if __name__ == "__main__":
 
             project = get_review_project(task_dir, task_lang)
 
-            for file in project.files:
-                for rule in task_rules:
-                    print(rule.rule(file))
+            # for file in project.files:
+            #     for rule in task_rules:
+            #         print(rule.rule(file))
+
+    task_dir = f'tests/test_repos/java/Strategy'
+    project = get_review_project(task_dir, 'java')
+
+    print(find_pattern('strategy', project))

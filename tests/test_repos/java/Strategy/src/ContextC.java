@@ -1,7 +1,7 @@
 public class ContextC {
     private Strategy strategy;
 
-    public void setStrategy(Strategy strategy) {
+    public ContextC(Strategy strategy) {
         this.strategy = strategy;
     }
 

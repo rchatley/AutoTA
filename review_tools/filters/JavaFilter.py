@@ -81,6 +81,9 @@ class JavaFilter(Filter):
             return True
         if not hasattr(node, 'type') or node.type is None:
             return False
+        if not hasattr(node.type, 'name'):
+            return False
+
         return node.type.name == self.node_type
 
     def _filter_node_return_type(self, node):
