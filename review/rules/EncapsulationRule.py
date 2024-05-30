@@ -1,29 +1,38 @@
-from review.rules.Rule import Rule
 from review.filters.JavaFilter import JavaFilter
+from review.rules.Rule import Rule
 
 
+# Checks that all classes within scope are Encapsulated
 class EncapsulationRule(Rule):
-    def __init__(self, scope='project'):
+    def __init__(self, scope='project', getters=False, setters=False):
         super().__init__(scope)
-        self.traversal = self.build_traversal()
-        self.rule = self.build_rule()
+        self._getters = getters
+        self._setters = setters
 
-    def build_traversal(self):
-        def traversal(ast):
-            unencapsulated_fields = []
+    def apply(self, file):
+        ast = self.filter(file)
+        if file is None:
+            return []
 
-            classes = JavaFilter(node_class='class').get_nodes(ast)
-            for ast_class in classes:
-                class_fields = JavaFilter(node_class='field').get_nodes(
-                    ast_class)
-                encapsulated_fields = JavaFilter(
-                    node_class='field',
-                    node_modifiers=[
-                        'private', 'final']).get_nodes(ast_class)
-                unencapsulated_fields.extend(
-                    [field for field in class_fields if
-                     field not in encapsulated_fields])
+        feedback = []
+        for ast_class in JavaFilter(node_class='class').get_nodes(ast):
+            visible_fields = JavaFilter(node_class='field',
+                                        node_modifiers=['private'],
+                                        negatives=[
+                                            'node_modifiers']).get_nodes(
+                ast_class)
 
-            return unencapsulated_fields
+            for field in visible_fields:
+                line, char = field.position
+                feedback.append(
+                    f'{line}:{char}: In class {ast_class.name}, '
+                    f'the {field.declarators[0].name} field is '
+                    f'not private')
 
-        return traversal
+            if self._getters:
+                pass
+
+            if self._setters:
+                pass
+
+        return feedback

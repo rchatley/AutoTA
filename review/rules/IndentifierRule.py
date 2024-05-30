@@ -11,7 +11,6 @@ class IdentifierRule(Rule):
         self.annotations = annotations
 
         self.traversal = self.build_traversal()
-        self.rule = self.build_rule()
 
     def build_traversal(self):
         def traversal(ast):
