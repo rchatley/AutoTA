@@ -1,5 +1,5 @@
 from review.rules.EncapsulationRule import EncapsulationRule
-from review.rules.IndentifierRule import IdentifierRule
+from review.rules.IdentifierRule import IdentifierRule
 
 
 def sample_spec():
