@@ -5,7 +5,7 @@ from review.patterns.DesignPattern import find_pattern
 from review.project.ReviewFile import ReviewFile
 from review.project.ReviewProject import ReviewProject
 from review.rules.EncapsulationRule import EncapsulationRule
-from review.rules.IndentifierRule import IdentifierRule
+from review.rules.IdentifierRule import IdentifierRule
 
 
 def get_task_spec(task_number, task_language):
@@ -58,10 +58,13 @@ if __name__ == "__main__":
                 #     for rule in task_rules:
                 #         print(rule.rule(file))
 
-        task_dir = 'sed_repos/java/SED4/'
+        task_dir = 'sed_repos/java/SED1/'
         project = get_review_project(task_dir, 'java')
 
         print(find_pattern('singleton', project))
+
+        project.apply_rules([IdentifierRule(annotations=['Test'],
+                                            name_format=r"^test")])
 
     elif len(sys.argv) < 3:
         repo_dir = sys.argv[1]
