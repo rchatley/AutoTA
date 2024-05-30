@@ -45,7 +45,7 @@ def build_filter(scope):
     return default_filter
 
 
-class SimpleRule:
+class Rule:
     def __init__(self, scope='project'):
         self.filter = build_filter(scope)
         self.traversal = default_traversal

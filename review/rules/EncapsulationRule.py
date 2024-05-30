@@ -1,8 +1,8 @@
-from review_tools.rules.simple_rules.SimpleRule import SimpleRule
-from review_tools.filters.JavaFilter import JavaFilter
+from review.rules.Rule import Rule
+from review.filters.JavaFilter import JavaFilter
 
 
-class EncapsulationRule(SimpleRule):
+class EncapsulationRule(Rule):
     def __init__(self, scope='project'):
         super().__init__(scope)
         self.traversal = self.build_traversal()

@@ -2,7 +2,7 @@ import re
 
 from javalang import tree
 
-from review_tools.filters.Filter import Filter
+from review.filters.Filter import Filter
 
 
 class JavaFilter(Filter):
@@ -93,7 +93,7 @@ class JavaFilter(Filter):
             return False
         return node.return_type.name == self.node_return_type
 
-    def passes_filter(self, node):
+    def _passes_filter(self, node):
         return all([
             self._filter_node_class(node),
             self._filter_node_name(node),
@@ -106,5 +106,5 @@ class JavaFilter(Filter):
         ])
 
     def get_nodes(self, ast):
-        instances = [node for _, node in ast if self.passes_filter(node)]
+        instances = [node for _, node in ast if self._passes_filter(node)]
         return instances

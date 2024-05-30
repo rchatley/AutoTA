@@ -1,9 +1,8 @@
+import ast as python_ast
 import os
 
-from javalang import tokenizer, tree
+from javalang import tokenizer
 from javalang.parser import Parser
-
-import ast as python_ast
 
 
 def add_node_to_dict(node_dict, node):
@@ -29,20 +28,5 @@ class ReviewFile:
         elif extension == '.java':
             self.tokens = list(tokenizer.tokenize(self.contents))
             self.ast = Parser(self.tokens).parse()
-            # self.public_nodes = self.get_public_nodes()
         else:
             self.ast = None
-
-    def get_public_nodes(self):
-        public_nodes = {}
-
-        for path, node in self.ast:
-            if isinstance(node, tree.InterfaceDeclaration):
-                add_node_to_dict(public_nodes, node)
-            elif hasattr(node, 'modifiers') and node.modifiers is not None:
-                for modifier in node.modifiers:
-                    if modifier == 'public':
-                        add_node_to_dict(public_nodes, node)
-                        break
-
-        return public_nodes

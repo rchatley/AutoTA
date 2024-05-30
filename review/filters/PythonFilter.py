@@ -1,6 +1,6 @@
 import ast as python_ast
 
-from review_tools.filters.Filter import Filter
+from review.filters.Filter import Filter
 
 
 class PythonFilter(Filter):
@@ -19,12 +19,12 @@ class PythonFilter(Filter):
             return True
         return True
 
-    def passes_filter(self, node):
+    def _passes_filter(self, node):
         return all([
             self._filter_node_class(node),
             self._filter_node_name(node)
         ])
 
     def get_nodes(self, ast):
-        nodes = [node for _, node in ast if self.passes_filter(node)]
+        nodes = [node for _, node in ast if self._passes_filter(node)]
         return nodes
