@@ -17,8 +17,10 @@ class ReviewFile:
         extension = os.path.splitext(file_name)[1]
 
         if extension == '.py':
+            self.language = 'python'
             self.ast = python_ast.parse(self.contents)
         elif extension == '.java':
+            self.language = 'java'
             self.tokens = list(tokenizer.tokenize(self.contents))
             self.ast = Parser(self.tokens).parse()
         else:

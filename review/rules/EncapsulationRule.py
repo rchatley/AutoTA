@@ -10,29 +10,30 @@ class EncapsulationRule(Rule):
         self._setters = setters
 
     def apply(self, file):
-        ast = self.filter(file)
+        ast = self.file_filter(file)
         if file is None:
             return []
 
         feedback = []
-        for ast_class in JavaFilter(node_class='class').get_nodes(ast):
-            visible_fields = JavaFilter(node_class='field',
-                                        node_modifiers=['private'],
-                                        negatives=[
-                                            'node_modifiers']).get_nodes(
-                ast_class)
+        if file.language == 'java':
+            for ast_class in JavaFilter(node_class='class').get_nodes(ast):
+                visible_fields = JavaFilter(node_class='field',
+                                            node_modifiers=['private'],
+                                            negatives=[
+                                                'node_modifiers']).get_nodes(
+                    ast_class)
 
-            for field in visible_fields:
-                line, char = field.position
-                feedback.append(
-                    f'{file.file_name}:{line}:{char}: In class {ast_class.name}, '
-                    f'the {field.declarators[0].name} field is '
-                    f'not private')
+                for field in visible_fields:
+                    line, char = field.position
+                    feedback.append(
+                        f'{file.file_name}:{line}:{char}: In class'
+                        f' {ast_class.name}, the {field.declarators[0].name} '
+                        f'field is not private')
 
-            if self._getters:
-                pass
+                if self._getters:
+                    pass
 
-            if self._setters:
-                pass
+                if self._setters:
+                    pass
 
         return feedback

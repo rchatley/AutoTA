@@ -5,7 +5,7 @@ class Rule:
     def __init__(self, scope='project'):
         self.scope = scope
 
-    def filter(self, file):
+    def file_filter(self, file):
         if self.scope == 'project':
             return file.ast
 
@@ -25,8 +25,8 @@ class Rule:
             else:
                 return None
 
-        print('ERROR')
-        return Exception
+        print('Invalid scope given')
+        return file.ast
 
     def apply(self, review_file):
         return NotImplementedError

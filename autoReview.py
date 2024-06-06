@@ -1,5 +1,6 @@
 import sys
 
+from review.filters.JavaFilter import JavaFilter
 from review.patterns.DesignPattern import DesignPattern
 from review.project.ReviewProject import ReviewProject
 from review.project.Spec import get_task_spec
@@ -30,8 +31,11 @@ if __name__ == "__main__":
 
         print(DesignPattern('singleton').find_pattern(project))
 
-        project.apply_rules([IdentifierRule(annotations=['Test'],
-                                            name_format=r"^test")])
+        project.apply_rules(
+            [IdentifierRule(node_filter=JavaFilter(node_class='method',
+                                                   node_annotations=[
+                                                       'Test'],
+                                                   node_name=r"^test"))])
 
     elif len(sys.argv) < 3:
         repo_dir = sys.argv[1]
