@@ -5,13 +5,6 @@ from javalang import tokenizer
 from javalang.parser import Parser
 
 
-def add_node_to_dict(node_dict, node):
-    if node.name in node_dict:
-        node_dict[node.name].append(node)
-    else:
-        node_dict[node.name] = [node]
-
-
 class ReviewFile:
 
     def __init__(self, root, file_name):
