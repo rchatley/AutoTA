@@ -7,12 +7,15 @@ from javalang.parser import Parser
 
 class ReviewFile:
 
-    def __init__(self, root, file_name):
+    def __init__(self, root, file_name, contents=None):
         self.root = root
         self.file_name = file_name
 
-        with open(os.path.join(root, file_name), 'r') as file:
-            self.contents = file.read()
+        if contents is None:
+            with open(os.path.join(root, file_name), 'r') as file:
+                self.contents = file.read()
+        else:
+            self.contents = contents
 
         extension = os.path.splitext(file_name)[1]
 

@@ -1,3 +1,5 @@
+import ast as python_ast
+
 from review.filters.JavaFilter import JavaFilter
 from review.rules.Rule import Rule
 
@@ -35,5 +37,34 @@ class EncapsulationRule(Rule):
 
                 if self._setters:
                     pass
+        elif file.language == 'python':
+            class PublicFieldVisitor(python_ast.NodeVisitor):
+                def __init__(self):
+                    self.current_class = None
+                    self.public_fields = []
+
+                def visit_ClassDef(self, node):
+                    self.current_class = node.name
+                    self.generic_visit(node)
+                    self.current_class = None
+
+                def visit_Assign(self, node):
+                    if self.current_class:
+                        for target in node.targets:
+                            if not target.attr.startswith('_'):
+                                self.public_fields.append((target.attr,
+                                                           target.lineno,
+                                                           target.col_offset,
+                                                           self.current_class))
+                    self.generic_visit(node)
+
+            visitor = PublicFieldVisitor()
+            visitor.visit(ast)
+
+            for field_name, line, char, class_name in visitor.public_fields:
+                feedback.append(
+                    f'{file.file_name}:{line}:{char}: In class'
+                    f' {class_name}, the {field_name} '
+                    f'field is not private')
 
         return feedback

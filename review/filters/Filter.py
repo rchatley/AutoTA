@@ -5,7 +5,15 @@ def get_node_name(node, lang):
         elif hasattr(node, 'declarators'):
             return node.declarators[0].name
     elif lang == 'python':
-        return node.name
+        if hasattr(node, 'name'):
+            return node.name
+        if hasattr(node, 'targets'):
+            for target in node.targets:
+                if hasattr(node, 'id'):
+                    return target.id
+        if hasattr(node, 'target'):
+            if hasattr(node, 'id'):
+                return node.target.id
 
 
 class Filter:

@@ -15,8 +15,14 @@ class IdentifierRule(Rule):
 
         feedback = []
         for node in self.node_filter.get_nodes(ast):
-            line, char = node.position
-            name = get_node_name(node, 'java')
+
+            if file.language == 'java':
+                line, char = node.position
+                name = get_node_name(node, 'java')
+            elif file.language == 'python':
+                line, char = node.lineno, node.col_offset
+                name = get_node_name(node, 'python')
+
             feedback.append(
                 f'{file.file_name}:{line}:{char}: The {self.node_filter.node_class}, '
                 f'{name}, does not follow the specified naming convention.')
