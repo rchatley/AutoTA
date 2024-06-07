@@ -8,7 +8,8 @@ def add_node_to_dict(node_dict, key, item):
         node_dict[key] = [item]
 
 
-def find_template_pattern(files):
+def find_template_pattern(project):
+    files = project.files
     template_class_candidates = {}
     for file in files:
         # Get abstract classes
@@ -72,7 +73,8 @@ def find_template_pattern(files):
     return template_subclasses
 
 
-def find_singleton_pattern(files):
+def find_singleton_pattern(project):
+    files = project.files
     singletons = []
     for file in files:
         # Get classes
@@ -101,7 +103,8 @@ def find_singleton_pattern(files):
     return singletons
 
 
-def find_strategy_pattern(files):
+def find_strategy_pattern(project):
+    files = project.files
     strategy_node_candidates = {}
     for file in files:
         for interface in JavaFilter(node_class='interface').get_nodes(
@@ -171,18 +174,9 @@ pattern_dict = {'template': find_template_pattern,
                 'singleton': find_singleton_pattern}
 
 
-def find_pattern(pattern, project):
-    return pattern_dict[pattern](project.files)
-
-# pattern = {'SINGLETON': {'CLASSNAME': JavaFilter(node_class='class'),
-#                              'with':
-#                                  {'INSTANCE': JavaFilter(node_class='field',
-#                                                          node_modifiers=[
-#                                                              'private'],
-#                                                          node_type='CLASSNAME'),
-#                                   'GETTER': JavaFilter(node_class='method',
-#                                                        node_return_type='CLASSNAME'),
-#                                   'PRIVATE CONSTRUCTOR': JavaFilter(
-#                                       node_class='constructor',
-#                                       node_modifiers=['private'])}
-#                              }}
+class DesignPattern:
+    def __init__(self, pattern):
+        if pattern in pattern_dict.keys():
+            self.find_pattern = pattern_dict[pattern]
+        else:
+            self.find_pattern = None
