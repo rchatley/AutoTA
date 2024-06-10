@@ -63,5 +63,12 @@ class ReviewProject:
 
         return pattern_feedback
 
+    def print_feedback(self):
+        if not self.feedback:
+            print('User code passes all rules')
+        else:
+            for feedback in self.feedback:
+                print(feedback)
+
     def get_summary(self, api_key_file):
         return api_key_file

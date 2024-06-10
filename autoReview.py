@@ -8,7 +8,8 @@ if __name__ == "__main__":
         directory = 'test/sed_repos/java/SED1'
         spec = build_spec("")
         project = ReviewProject(directory, spec)
-        print(project.feedback)
+
+        project.print_feedback()
 
     elif len(sys.argv) < 3:
         repo_dir = sys.argv[1]
@@ -17,6 +18,6 @@ if __name__ == "__main__":
         spec = build_spec(spec_file)
         project = ReviewProject(repo_dir, spec)
 
-        print(project.feedback)
+        project.print_feedback()
 
         # print(project.get_summary(key_file))
