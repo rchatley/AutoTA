@@ -1,10 +1,10 @@
 import sys
 
-from review.filters.JavaFilter import JavaFilter
-from review.patterns.DesignPattern import DesignPattern
-from review.project.ReviewProject import ReviewProject
-from review.project.Spec import get_task_spec
-from review.rules.IdentifierRule import IdentifierRule
+from src.filters.JavaFilter import JavaFilter
+from src.patterns.DesignPattern import DesignPattern
+from src.project.ReviewProject import ReviewProject
+from src.project.Spec import get_task_spec
+from src.rules.IdentifierRule import IdentifierRule
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
         for task_num in sed_tasks:
             for task_lang in task_langs:
-                task_dir = f'sed_repos/{task_lang}/SED{task_num}/'
+                task_dir = f'tests/sed_repos/{task_lang}/SED{task_num}/'
 
                 task_rules = get_task_spec(task_num, task_lang)
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
                 #     for rule in task_rules:
                 #         print(rule.rule(file))
 
-        task_dir = 'sed_repos/java/SED4/'
+        task_dir = 'test/sed_repos/java/SED4/'
         project = ReviewProject(task_dir, 'java')
 
         print(DesignPattern('singleton').find_pattern(project))
