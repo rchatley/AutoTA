@@ -25,4 +25,4 @@ jobs:
         run: chmod +x reviewCode.sh
 
       - name: Run
-        run: ./reviewCode.sh test/sed_repos/SED1 spec_file
+        run: ./reviewCode.sh test/sed_repos/java/SED1 spec_file

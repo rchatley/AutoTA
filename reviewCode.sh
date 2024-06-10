@@ -29,7 +29,6 @@ while [[ "$1" != "" ]]; do
     args="$args $1"
     shift
 done
-echo "Arguments constructed: $args"
 
 # Running the Python script with arguments
 python autoReview.py $args || error_exit "Failed to run autoReview.py."
