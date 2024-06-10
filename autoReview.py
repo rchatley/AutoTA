@@ -4,14 +4,14 @@ from src.project.ReviewProject import ReviewProject
 from src.project.Spec import build_spec
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         directory = 'test/sed_repos/java/SED1'
         spec = build_spec("")
         project = ReviewProject(directory, spec)
 
         project.print_feedback()
 
-    elif len(sys.argv) < 3:
+    elif len(sys.argv) < 4:
         repo_dir = sys.argv[1]
         spec_file = sys.argv[2]
 
