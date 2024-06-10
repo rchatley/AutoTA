@@ -31,4 +31,4 @@ while [[ "$1" != "" ]]; do
 done
 
 # Running the Python script with arguments
-python autoReview.py "$args" || error_exit "Failed to run autoReview.py."
+python autoReview.py $args || error_exit "Failed to run autoReview.py."
