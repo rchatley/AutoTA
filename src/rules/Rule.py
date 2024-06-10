@@ -13,7 +13,7 @@ class Rule:
         if scope_type == 'dir':
             directory_path = os.path.normpath(scope)
             if os.path.commonpath(
-                    [os.path.normpath(file.root),
+                    [os.path.normpath(file.relative_path),
                      directory_path]) == directory_path:
                 return file.ast
             else:

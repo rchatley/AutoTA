@@ -5,8 +5,9 @@ import javalang as java_ast
 
 class ReviewFile:
 
-    def __init__(self, root, file_name, contents=None):
+    def __init__(self, root, relative_path, file_name, contents=None):
         self.root = root
+        self.relative_path = relative_path
         self.file_name = file_name
 
         if contents is None:

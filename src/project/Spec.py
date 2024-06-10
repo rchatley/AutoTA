@@ -35,7 +35,10 @@ def get_task_spec(task_number, task_language):
 
 
 def build_spec(spec_file):
-    return Spec('java')
+    language = 'java'
+    rules = [EncapsulationRule(scope=('dir', 'src/main'))]
+
+    return Spec('java', rules=rules)
 
 
 class Spec:

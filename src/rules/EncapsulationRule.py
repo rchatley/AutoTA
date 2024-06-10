@@ -13,7 +13,7 @@ class EncapsulationRule(Rule):
 
     def apply(self, file):
         ast = self.file_filter(file)
-        if file is None:
+        if ast is None:
             return []
 
         feedback = []

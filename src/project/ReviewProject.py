@@ -16,7 +16,9 @@ class ReviewProject:
         for root, _, dir_files in os.walk(directory):
             for file_name in dir_files:
                 if file_name.endswith(f'.{file_extension}'):
-                    self.files.append(ReviewFile(root, file_name))
+                    self.files.append(
+                        ReviewFile(root, os.path.relpath(root, directory),
+                                   file_name))
 
         # BUILD UML GRAPH
         self.uml_graph = uml_scope

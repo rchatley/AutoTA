@@ -17,7 +17,7 @@ class TestRules(unittest.TestCase):
             }
         }
         """
-        file = ReviewFile('./', 'example.java', contents=code)
+        file = ReviewFile('./', "", 'example.java', contents=code)
         results = EncapsulationRule().apply(file)
 
         self.assertEqual(results, [])
@@ -31,7 +31,7 @@ class TestRules(unittest.TestCase):
             }
         }
         """
-        file = ReviewFile('./', 'example.java', contents=code)
+        file = ReviewFile('./', "", 'example.java', contents=code)
         results = EncapsulationRule().apply(file)
 
         self.assertEqual(len(results), 1)
@@ -45,7 +45,7 @@ class TestRules(unittest.TestCase):
             }
         }
         """
-        file = ReviewFile('./', 'example.java', contents=code)
+        file = ReviewFile('./', "", 'example.java', contents=code)
         results = IdentifierRule(node_filter=JavaFilter(node_class='method',
                                                         node_name=r"^test")).apply(
             file)
@@ -61,7 +61,7 @@ class TestRules(unittest.TestCase):
             }
         }
         """
-        file = ReviewFile('./', 'example.java', contents=code)
+        file = ReviewFile('./', "", 'example.java', contents=code)
         results = IdentifierRule(node_filter=JavaFilter(node_class='method',
                                                         node_name=r"^test")).apply(
             file)
@@ -74,7 +74,7 @@ class TestRules(unittest.TestCase):
             def get_encapsulated(self):
                 return self.encapsulated
         """
-        file = ReviewFile('./', 'example.py', contents=code)
+        file = ReviewFile('./', "", 'example.py', contents=code)
         results = EncapsulationRule().apply(file)
 
         self.assertEqual(results, [])
@@ -85,7 +85,7 @@ class TestRules(unittest.TestCase):
             def get_encapsulated(self):
                 return self.encapsulated
         """
-        file = ReviewFile('./', 'example.py', contents=code)
+        file = ReviewFile('./', "", 'example.py', contents=code)
         results = EncapsulationRule().apply(file)
 
         self.assertEqual(1, len(results))
@@ -96,7 +96,7 @@ class TestRules(unittest.TestCase):
             def get_encapsulated(self):
                 return self.encapsulated
         """
-        file = ReviewFile('./', 'example.py', contents=code)
+        file = ReviewFile('./', "", 'example.py', contents=code)
         results = IdentifierRule(
             node_filter=PythonFilter(node_class='method',
                                      node_name=r'.*[A-Z].*')).apply(file)
@@ -109,7 +109,7 @@ class TestRules(unittest.TestCase):
             def getEncapsulated(self):
                 return self.encapsulated
         """
-        file = ReviewFile('./', 'example.py', contents=code)
+        file = ReviewFile('./', "", 'example.py', contents=code)
         results = IdentifierRule(
             node_filter=PythonFilter(node_class='method',
                                      node_name=r'.*[A-Z].*')).apply(file)
