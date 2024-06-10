@@ -16,7 +16,7 @@ fi
 
 # Install required packages from requirements.txt if available
 if [ -f requirements.txt ]; then
-    echo "Installing required packages..."
+    echo "- Installing required packages..."
     python -m pip install --upgrade pip || error_exit "Failed to upgrade pip."
     python -m pip install -r requirements.txt || error_exit "Failed to install required packages."
 else
@@ -29,6 +29,7 @@ while [[ "$1" != "" ]]; do
     args="$args $1"
     shift
 done
+echo "Arguments constructed: $args"
 
 # Running the Python script with arguments
 python autoReview.py $args || error_exit "Failed to run autoReview.py."
