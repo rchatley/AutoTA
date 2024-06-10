@@ -1,8 +1,6 @@
-import ast as python_ast
 import os
-
-from javalang import tokenizer
-from javalang.parser import Parser
+import ast as python_ast
+import javalang as java_ast
 
 
 class ReviewFile:
@@ -24,7 +22,7 @@ class ReviewFile:
             self.ast = python_ast.parse(self.contents)
         elif extension == '.java':
             self.language = 'java'
-            self.tokens = list(tokenizer.tokenize(self.contents))
-            self.ast = Parser(self.tokens).parse()
+            tokens = list(java_ast.tokenizer.tokenize(self.contents))
+            self.ast = java_ast.parser.Parser(tokens).parse()
         else:
             self.ast = None

@@ -34,6 +34,10 @@ def get_task_spec(task_number, task_language):
     return lang_spec_dict[task_language][task_number]
 
 
+def build_spec(spec_file):
+    return Spec('java')
+
+
 class Spec:
     def __init__(self, language, rules=None, patterns=None):
         self.language = language
