@@ -1,11 +1,12 @@
 import os
 
+from src.project.ERGraph import ERGraph
 from src.project.ReviewFile import ReviewFile
 
 
 class ReviewProject:
 
-    def __init__(self, directory, spec, uml_scope=None):
+    def __init__(self, directory, spec, er_scope=None):
         self.directory = directory
         self.spec = spec
         self.files = []
@@ -20,8 +21,15 @@ class ReviewProject:
                         ReviewFile(root, os.path.relpath(root, directory),
                                    file_name))
 
-        # BUILD UML GRAPH
-        self.uml_graph = uml_scope
+        if er_scope is None:
+            self.er_graph = ERGraph(spec.language, self.files)
+        else:
+            scope_dir = os.path.normpath(er_scope)
+            scoped_files = [file for file in self.files if
+                            os.path.commonpath(
+                                [os.path.normpath(file.relative_path),
+                                 scope_dir]) == scope_dir]
+            self.er_graph = ERGraph(spec.language, scoped_files)
 
         # GET FEEDBACK
         self.feedback = self.get_feedback()
@@ -39,9 +47,6 @@ class ReviewProject:
         return feedback
 
     def apply_rules(self, rules):
-        if rules is None:
-            return []
-
         rule_feedback = []
         for file in self.files:
             for rule in rules:
@@ -52,12 +57,9 @@ class ReviewProject:
         return rule_feedback
 
     def find_patterns(self, patterns):
-        if patterns is None:
-            return []
-
         pattern_feedback = []
         for pattern in patterns:
-            feedback = pattern.find_in(self.uml_graph)
+            feedback = pattern.find_in(self.er_graph)
             if feedback:
                 pattern_feedback.extend(feedback)
 
@@ -69,6 +71,3 @@ class ReviewProject:
         else:
             for feedback in self.feedback:
                 print(feedback)
-
-    def get_summary(self, api_key_file):
-        return api_key_file
