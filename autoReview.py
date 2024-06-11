@@ -5,7 +5,7 @@ from src.project.Spec import build_spec
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        directory = 'test/sed_repos/java/SED1'
+        directory = 'test/sed_repos/java/SED3'
         spec = build_spec("")
         project = ReviewProject(directory, spec)
 
@@ -20,4 +20,5 @@ if __name__ == "__main__":
 
         project.print_feedback()
 
-        # print(project.get_summary(key_file))
+        if False:
+            print(get_llm_summary(project))
