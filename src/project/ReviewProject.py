@@ -1,6 +1,7 @@
 import os
 
-from src.entity_relations.ERGraph import ERGraph
+from src.entity_relations.JavaGraph import build_java_graph
+from src.entity_relations.PythonGraph import build_python_graph
 from src.project.ReviewFile import ReviewFile
 
 
@@ -22,14 +23,14 @@ class ReviewProject:
                                    file_name))
 
         if er_scope is None:
-            self.er_graph = ERGraph(spec.language, self.files)
+            self.er_graph = self.build_er_graph(self.files)
         else:
             scope_dir = os.path.normpath(er_scope)
             scoped_files = [file for file in self.files if
                             os.path.commonpath(
                                 [os.path.normpath(file.relative_path),
                                  scope_dir]) == scope_dir]
-            self.er_graph = ERGraph(spec.language, scoped_files)
+            self.er_graph = self.build_er_graph(scoped_files)
 
         # GET FEEDBACK
         self.feedback = self.get_feedback()
@@ -64,6 +65,12 @@ class ReviewProject:
                 pattern_feedback.extend(feedback)
 
         return pattern_feedback
+
+    def build_er_graph(self, files):
+        if self.spec.language == 'java':
+            return build_java_graph(files)
+        elif self.spec.language == 'python':
+            return build_python_graph(files)
 
     def print_feedback(self):
         if not self.feedback:

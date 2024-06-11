@@ -7,7 +7,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 3:
         directory = 'test/sed_repos/java/SED3'
         spec = build_spec("")
-        project = ReviewProject(directory, spec)
+        project = ReviewProject(directory, spec, er_scope='src/main')
 
         project.print_feedback()
 
