@@ -1,6 +1,6 @@
 import os
 
-from src.project.ERGraph import ERGraph
+from src.entity_relations.ERGraph import ERGraph
 from src.project.ReviewFile import ReviewFile
 
 
