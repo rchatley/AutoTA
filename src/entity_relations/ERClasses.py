@@ -60,9 +60,7 @@ class Relation:
         return f'{self.entity_from} {self.relation_type} {self.entity_to}'
 
     def __repr__(self):
-        return (f'Relation(entity_from={self.entity_from}, '
-                f'entity_to={self.entity_to}, '
-                f'relation_type={self.relation_type})')
+        return f'{self.entity_from} {self.relation_type} {self.entity_to}'
 
 
 class Has(Relation):
@@ -78,3 +76,18 @@ class Implements(Relation):
 class Extends(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'extends')
+
+
+class ParameterOfType(Relation):
+    def __init__(self, class_entity, member_entity):
+        super().__init__(class_entity, member_entity, 'parameterOfType')
+
+
+class IsOfType(Relation):
+    def __init__(self, class_entity, member_entity):
+        super().__init__(class_entity, member_entity, 'isOfType')
+
+
+class HasReturnType(Relation):
+    def __init__(self, class_entity, member_entity):
+        super().__init__(class_entity, member_entity, 'hasReturnType')
