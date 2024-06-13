@@ -53,7 +53,6 @@ def build_java_graph(files):
     # Initial Pass
     for file in files:
         file_nodes[file] = []
-        relations = []
         for node in file.ast.types:
             if isinstance(node, java_ast_tree.ClassDeclaration):
                 abstract_class = 'abstract' in node.modifiers
@@ -68,14 +67,13 @@ def build_java_graph(files):
 
                 for member in node.body:
                     if isinstance(member, java_ast_tree.MethodDeclaration):
-                        if abstract_class:
-                            if 'abstract' in member.modifiers:
-                                method_entity = AbstractMethod(member.name, {},
-                                                               member)
-                            else:
-                                method_entity = Method(member.name, {}, member)
+                        info = {'modifiers': member.modifiers}
+
+                        if abstract_class and 'abstract' in member.modifiers:
+                            method_entity = AbstractMethod(member.name, info,
+                                                           member)
                         else:
-                            method_entity = Method(member.name, {}, member)
+                            method_entity = Method(member.name, info, member)
 
                         entities.append(method_entity)
                         file_nodes[file].append(method_entity)
@@ -85,7 +83,7 @@ def build_java_graph(files):
 
                     elif isinstance(member,
                                     java_ast_tree.FieldDeclaration):
-                        info = {'modifiers': [member.modifiers],
+                        info = {'modifiers': member.modifiers,
                                 'type': member.type.name}
                         for field in member.declarators:
                             field_entity = Field(field.name, info, member)
@@ -98,8 +96,9 @@ def build_java_graph(files):
 
                     elif isinstance(member,
                                     java_ast_tree.ConstructorDeclaration):
+                        info = {'modifiers': member.modifiers}
                         constructor_entity = Constructor(
-                            member.name + ' constructor', {},
+                            member.name + ' constructor', info,
                             member)
                         entities.append(constructor_entity)
                         file_nodes[file].append(constructor_entity)
@@ -181,6 +180,14 @@ def build_java_graph(files):
                         if related_entity is not None:
                             relations.append(
                                 ParameterOfType(entity, related_entity))
+            if node.return_type is not None:
+                if isinstance(node.return_type, java_ast_tree.ReferenceType):
+                    related_entity = find_in_dict(initial_entities,
+                                                  node.return_type.name,
+                                                  entity)
+                    if related_entity is not None:
+                        relations.append(
+                            HasReturnType(entity, related_entity))
         elif entity.type == 'abstractMethod':
             if node.parameters is not None and len(node.parameters) > 0:
                 for param in node.parameters:

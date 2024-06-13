@@ -2,9 +2,9 @@ class Entity:
     types = {'class', 'abstractClass', 'interface', 'constructor', 'method',
              'abstractMethod', 'field'}
 
-    def __init__(self, name, entity_type, info, node=None):
-        self.name = name
+    def __init__(self, entity_type=None, name=None, info=None, node=None):
         self.type = entity_type
+        self.name = name
         self.info = info
         self.node = node
 
@@ -12,42 +12,42 @@ class Entity:
         return f'{self.type}: {self.name}'
 
     def __repr__(self):
-        return f'Entity(name={self.name}, type={self.type}'
+        return f'{self.type} : {self.name}'
 
 
 class Class(Entity):
-    def __init__(self, name, info, node=None):
-        super().__init__(name, 'class', info, node)
+    def __init__(self, name=None, info=None, node=None):
+        super().__init__('class', name, info, node)
 
 
 class AbstractClass(Entity):
-    def __init__(self, name, info, node=None):
-        super().__init__(name, 'abstractClass', info, node)
+    def __init__(self, name=None, info=None, node=None):
+        super().__init__('abstractClass', name, info, node)
 
 
 class Interface(Entity):
-    def __init__(self, name, info, node=None):
-        super().__init__(name, 'interface', info, node)
+    def __init__(self, name=None, info=None, node=None):
+        super().__init__('interface', name, info, node)
 
 
 class Constructor(Entity):
-    def __init__(self, name, info, node=None):
-        super().__init__(name, 'constructor', info, node)
+    def __init__(self, name=None, info=None, node=None):
+        super().__init__('constructor', name, info, node)
 
 
 class Method(Entity):
-    def __init__(self, name, info, node=None):
-        super().__init__(name, 'method', info, node)
+    def __init__(self, name=None, info=None, node=None):
+        super().__init__('method', name, info, node)
 
 
 class AbstractMethod(Entity):
-    def __init__(self, name, info, node=None):
-        super().__init__(name, 'abstractMethod', info, node)
+    def __init__(self, name=None, info=None, node=None):
+        super().__init__('abstractMethod', name, info, node)
 
 
 class Field(Entity):
-    def __init__(self, name, info, node=None):
-        super().__init__(name, 'field', info, node)
+    def __init__(self, name=None, info=None, node=None):
+        super().__init__('field', name, info, node)
 
 
 class Relation:
