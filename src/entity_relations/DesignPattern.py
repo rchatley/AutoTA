@@ -29,8 +29,6 @@ def find_matching_entities(entity, graph):
 
 
 def relation_in_graph(entity_from, rel_type, entity_to, graph):
-
-
     for relation in graph['relations']:
         if rel_type == relation.relation_type and entity_from == relation.entity_from and entity_to == relation.entity_to:
             return True
@@ -38,19 +36,31 @@ def relation_in_graph(entity_from, rel_type, entity_to, graph):
 
 
 class DesignPattern:
-    def __init__(self):
-        self.entity_dict = {'singleton': Class(),
-                            'private constructor': Constructor(info=
-                                                               {'modifiers': {
-                                                                   'private'}}),
-                            'private instance': Field(
-                                info={'modifiers': {'private'}}),
-                            'get_instance': Method()}
-        self.relation_dict = {'singleton': {
-            'has': ['private constructor', 'private instance',
-                    'get_instance']},
-            'private instance': {'isOfType': ['singleton']},
-            'get_instance': {'hasReturnType': ['singleton']}}
+    def __init__(self, pattern='singleton'):
+
+        if pattern == 'singleton':
+            self.entity_dict = {'singleton': Class(),
+                                'private constructor': Constructor(info=
+                                {'modifiers': {
+                                    'private'}}),
+                                'private instance': Field(
+                                    info={'modifiers': {'private'}}),
+                                'get_instance': Method()}
+            self.relation_dict = {'singleton': {
+                'has': ['private constructor', 'private instance',
+                        'get_instance']},
+                'private instance': {'isOfType': ['singleton']},
+                'get_instance': {'hasReturnType': ['singleton']}}
+        elif pattern == 'templateMethod':
+            self.entity_dict = {'template': AbstractClass(),
+                                'abstract method': AbstractMethod(),
+                                'hook method': Method(),
+                                'subclass': Class(),
+                                'override': Method()}
+            self.relation_dict = {'template': {
+                'has': ['abstract method', 'hook method']},
+                'subclass': {'extends': ['template'],
+                          'has': ['override']}}
 
     def find_potential_isomorphisms(self, graph):
         node_dict = {}
@@ -74,6 +84,7 @@ class DesignPattern:
         elif len(missing_nodes) == 1:
             single_missing_node = missing_nodes[0]
             node_dict[missing_nodes[0]] = [Entity()]
+
         for from_node_name, relations in self.relation_dict.items():
             for rel_type, to_node_names in relations.items():
                 for to_node_name in to_node_names:
@@ -83,6 +94,9 @@ class DesignPattern:
                     matching_from_entities = node_dict[from_node_name]
                     matching_to_entities = node_dict[to_node_name]
                     ents_to_matches = [False] * len(matching_to_entities)
+                    if to_node_name == single_missing_node or from_node_name == single_missing_node:
+                        print('MISSING')
+                        continue
 
                     for matching_from_entity in matching_from_entities:
                         matched_from = False
@@ -97,7 +111,6 @@ class DesignPattern:
                         if not matched_from:
                             from_ents_to_remove.append(matching_from_entity)
 
-
                     for i, matches in enumerate(ents_to_matches):
                         if not matches:
                             to_ents_to_remove.append(matching_to_entities[i])
@@ -105,7 +118,7 @@ class DesignPattern:
                     for to_ent in to_ents_to_remove:
                         node_dict[to_node_name].remove(to_ent)
 
-            for from_ent in from_ents_to_remove:
-                node_dict[from_node_name].remove(from_ent)
+                    for from_ent in from_ents_to_remove:
+                        node_dict[from_node_name].remove(from_ent)
 
         print(node_dict)

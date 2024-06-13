@@ -16,6 +16,9 @@ def find_in_dict(name_dict, name, origin):
     if name in name_dict:
         if len(name_dict[name]) == 1:
             return name_dict[name][0]
+        if len(name_dict[name]) > 1:
+            return name_dict[name][1]
+
     return None
 
 
@@ -56,6 +59,7 @@ def build_java_graph(files):
         for node in file.ast.types:
             if isinstance(node, java_ast_tree.ClassDeclaration):
                 abstract_class = 'abstract' in node.modifiers
+                print(abstract_class)
                 class_entity = AbstractClass(node.name, {},
                                              node) if abstract_class else Class(
                     node.name, {}, node)
@@ -134,6 +138,7 @@ def build_java_graph(files):
                 related_entity = find_in_dict(initial_entities,
                                               node.extends.name,
                                               entity)
+                print(related_entity)
                 if related_entity is not None:
                     relations.append(Extends(entity, related_entity))
             if node.implements is not None and len(node.implements) > 0:
@@ -198,5 +203,6 @@ def build_java_graph(files):
                         if related_entity is not None:
                             relations.append(
                                 ParameterOfType(entity, related_entity))
-
+    print_graph(entities, relations)
+    print(relations)
     return {'entities': entities, 'relations': relations}
