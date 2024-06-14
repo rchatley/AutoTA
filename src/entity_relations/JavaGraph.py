@@ -23,23 +23,49 @@ def find_in_dict(name_dict, name, origin):
 
 
 def print_graph(entities, relations):
+    entity_colors = {
+        'class': 'skyblue',
+        'abstractClass': 'lightgreen',
+        'interface': 'lightcoral',
+        'constructor': 'lightyellow',
+        'method': 'lightpink',
+        'abstractMethod': 'lightgray',
+        'field': 'lightblue'
+    }
     G = nx.DiGraph()
-    for entity in entities:
-        G.add_node(str(entity))
 
+    # Add nodes to the graph
+    for entity in entities:
+        G.add_node(str(entity), entity_type=entity.type)
+
+    # Add edges to the graph
     for relation in relations:
         G.add_edge(str(relation.entity_from), str(relation.entity_to),
                    label=relation.relation_type)
 
-    # Visualize the graph
-    pos = nx.spring_layout(G)  # positions for all nodes
+    # Use the spring layout to position nodes
+    pos = nx.spring_layout(G, k=1,
+                           iterations=100)  # k controls the distance between nodes
 
-    plt.figure(figsize=(8, 6))
-    nx.draw(G, pos, with_labels=True, node_size=3000, node_color="skyblue",
+    plt.figure(figsize=(12, 8))
+
+    # Draw the nodes and edges
+    node_colors = [entity_colors[G.nodes[node]['entity_type']] for node in
+                   G.nodes]
+    nx.draw(G, pos, with_labels=True, node_size=3000, node_color=node_colors,
             font_size=10, font_weight="bold", arrows=True)
+
+    # Draw the edge labels
     edge_labels = nx.get_edge_attributes(G, 'label')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels,
-                                 font_color='red')
+                                 font_color='red', font_size=8, label_pos=0.5,
+                                 rotate=False)
+
+    # Adjust positions to avoid overlap with edge labels
+    for (node, (x, y)) in pos.items():
+        dx = 0.02  # Offset for x
+        dy = 0.02  # Offset for y
+        pos[node] = (x + dx, y + dy)
 
     plt.title("Entity Relation Graph")
     plt.show()
@@ -59,7 +85,6 @@ def build_java_graph(files):
         for node in file.ast.types:
             if isinstance(node, java_ast_tree.ClassDeclaration):
                 abstract_class = 'abstract' in node.modifiers
-                print(abstract_class)
                 class_entity = AbstractClass(node.name, {},
                                              node) if abstract_class else Class(
                     node.name, {}, node)
@@ -138,7 +163,6 @@ def build_java_graph(files):
                 related_entity = find_in_dict(initial_entities,
                                               node.extends.name,
                                               entity)
-                print(related_entity)
                 if related_entity is not None:
                     relations.append(Extends(entity, related_entity))
             if node.implements is not None and len(node.implements) > 0:
@@ -193,6 +217,15 @@ def build_java_graph(files):
                     if related_entity is not None:
                         relations.append(
                             HasReturnType(entity, related_entity))
+            for member in node.body:
+                for _, member_node in member:
+                    if isinstance(member_node, java_ast_tree.MethodInvocation):
+                        related_entity = find_in_dict(initial_entities,
+                                                      member_node.member,
+                                                      entity)
+                        relations.append(
+                            Invokes(entity, related_entity))
+
         elif entity.type == 'abstractMethod':
             if node.parameters is not None and len(node.parameters) > 0:
                 for param in node.parameters:
@@ -203,6 +236,15 @@ def build_java_graph(files):
                         if related_entity is not None:
                             relations.append(
                                 ParameterOfType(entity, related_entity))
-    print_graph(entities, relations)
-    print(relations)
+                if node.return_type is not None:
+                    if isinstance(node.return_type,
+                                  java_ast_tree.ReferenceType):
+                        related_entity = find_in_dict(initial_entities,
+                                                      node.return_type.name,
+                                                      entity)
+                        if related_entity is not None:
+                            relations.append(
+                                HasReturnType(entity, related_entity))
+    # print_graph(entities, relations)
+
     return {'entities': entities, 'relations': relations}

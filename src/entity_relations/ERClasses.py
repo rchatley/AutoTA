@@ -91,3 +91,8 @@ class IsOfType(Relation):
 class HasReturnType(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'hasReturnType')
+
+
+class Invokes(Relation):
+    def __init__(self, class_entity, member_entity):
+        super().__init__(class_entity, member_entity, 'invokes')

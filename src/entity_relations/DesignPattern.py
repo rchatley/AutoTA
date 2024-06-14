@@ -37,30 +37,74 @@ def relation_in_graph(entity_from, rel_type, entity_to, graph):
 
 class DesignPattern:
     def __init__(self, pattern='singleton'):
-
+        self.pattern = pattern
         if pattern == 'singleton':
-            self.entity_dict = {'singleton': Class(),
-                                'private constructor': Constructor(info=
-                                {'modifiers': {
-                                    'private'}}),
-                                'private instance': Field(
-                                    info={'modifiers': {'private'}}),
-                                'get_instance': Method()}
-            self.relation_dict = {'singleton': {
-                'has': ['private constructor', 'private instance',
-                        'get_instance']},
-                'private instance': {'isOfType': ['singleton']},
-                'get_instance': {'hasReturnType': ['singleton']}}
+            self.entity_dict = {
+                'singleton': Class(),
+                'private constructor': Constructor(
+                    info={'modifiers': {'private'}}),
+                'private instance': Field(
+                    info={'modifiers': {'private'}}),
+                'get_instance': Method()
+            }
+            self.relation_dict = {
+                'singleton': {
+                    'has': ['private constructor', 'private instance',
+                            'get_instance']
+                },
+                'private instance': {
+                    'isOfType': ['singleton']
+                },
+                'get_instance': {
+                    'hasReturnType': ['singleton']
+                }
+            }
         elif pattern == 'templateMethod':
-            self.entity_dict = {'template': AbstractClass(),
-                                'abstract method': AbstractMethod(),
-                                'hook method': Method(),
-                                'subclass': Class(),
-                                'override': Method()}
-            self.relation_dict = {'template': {
-                'has': ['abstract method', 'hook method']},
-                'subclass': {'extends': ['template'],
-                          'has': ['override']}}
+            self.entity_dict = {
+                'template': AbstractClass(),
+                'abstract method': AbstractMethod(),
+                'hook method': Method(),
+                'subclass': Class(),
+                'override': Method()
+            }
+            self.relation_dict = {
+                'template': {
+                    'has': ['abstract method', 'hook method']
+                },
+                'subclass': {
+                    'extends': ['template'],
+                    'has': ['override']
+                },
+                'hook method': {
+                    'invokes': ['abstract method']
+                }
+            }
+        elif pattern == 'strategy':
+            self.entity_dict = {
+                'context': Class(),
+                'strategy': Interface(),
+                'strategy_method': AbstractMethod(),
+                'concrete_strategy_a': Class(),
+                'concrete_strategy_b': Class(),
+                'execute_strategy': Method(),
+            }
+            self.relation_dict = {
+                'context': {
+                    'has': ['execute_strategy']
+                },
+                'strategy': {
+                    'has': ['strategy_method']
+                },
+                'concrete_strategy_a': {
+                    'implements': ['strategy']
+                },
+                'concrete_strategy_b': {
+                    'implements': ['strategy']
+                },
+                'execute_strategy': {
+                    'invokes': ['strategy_method']
+                }
+            }
 
     def find_potential_isomorphisms(self, graph):
         node_dict = {}
@@ -117,8 +161,24 @@ class DesignPattern:
 
                     for to_ent in to_ents_to_remove:
                         node_dict[to_node_name].remove(to_ent)
+                        if not node_dict[to_node_name]:
+                            print('COULD NOT FIND PATTERN')
+                            return
 
                     for from_ent in from_ents_to_remove:
                         node_dict[from_node_name].remove(from_ent)
+                        if not node_dict[from_node_name]:  #
+                            print('COULD NOT FIND PATTERN')
+                            return
 
-        print(node_dict)
+        return_string = "Found potential instance of " + self.pattern + " pattern:"
+        for node_name, entities in node_dict.items():
+            if len(entities) == 1:
+                return_string += node_name.upper() + ': ' + str(
+                    entities[0]) + '\n'
+            else:
+                return_string += node_name.upper() + ': '
+                for entity in entities:
+                    return_string += str(entity) + '\n'
+
+        return return_string
