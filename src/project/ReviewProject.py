@@ -48,27 +48,32 @@ class ReviewProject:
         return feedback
 
     def apply_rules(self, rules):
-        rule_feedback = []
-        for file in self.files:
-            for rule in rules:
+        complete_feedback = ["CODE STYLE RULES:"]
+        for rule in rules:
+            complete_feedback.append(str(rule) + ':')
+            rule_feedback = []
+            for file in self.files:
                 feedback = rule.apply(file)
                 if feedback:
                     rule_feedback.extend(feedback)
-                else:
-                    if isinstance(rule, EncapsulationRule):
-                        rule_feedback.append(
-                            f'All classes within file {file.file_name} within {rule.scope} were encapsulated')
-                    elif isinstance(rule, IdentifierRule):
-                        rule_feedback.append(
-                            f'All {rule.node_filter.node_class}s within file {file.file_name} within {rule.scope} had the correct identifier format of  {rule.node_filter.node_name}')
-
-        return rule_feedback
+            if not rule_feedback:
+                if isinstance(rule, EncapsulationRule):
+                    complete_feedback.append(
+                        f'All classes within {rule.scope} were properly encapsulated')
+                elif isinstance(rule, IdentifierRule):
+                    complete_feedback.append(
+                        f'All {rule.node_filter.node_class}s within {rule.scope} had the correct identifier format of {rule.node_filter.node_name}')
+            else:
+                complete_feedback.extend(rule_feedback)
+        complete_feedback.append("")
+        return complete_feedback
 
     def find_patterns(self, patterns):
-        pattern_feedback = []
+        pattern_feedback = ["DESIGN PATTERNS:"]
         for pattern in patterns:
-            feedback = pattern.find_potential_isomorphisms(self.er_graph)
-            pattern_feedback.append(feedback)
+            pattern_feedback.append('-' + pattern.pattern + '\n' +
+                                    pattern.find_potential_isomorphisms(
+                                        self.er_graph))
 
         return pattern_feedback
 

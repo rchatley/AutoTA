@@ -1,3 +1,5 @@
+import os.path
+
 import javalang.tree as java_ast_tree
 import networkx as nx
 from matplotlib import pyplot as plt
@@ -12,13 +14,20 @@ def add_node_to_dict(node_dict, key, item):
         node_dict[key] = [item]
 
 
-def find_in_dict(name_dict, name, origin):
+def find_in_dict(name, name_dict, origin):
     if name in name_dict:
         if len(name_dict[name]) == 1:
             return name_dict[name][0]
-        if len(name_dict[name]) > 1:
-            return name_dict[name][1]
-
+        elif len(name_dict[name]) > 1:
+            package_visible = [entity for entity in name_dict[name] if
+                               entity.package == origin.package]
+            if len(package_visible) == 1:
+                return package_visible[0]
+            elif len(package_visible) > 1:
+                file_visible = [entity for entity in package_visible if
+                                entity.file == origin.file]
+                if len(file_visible) > 0:
+                    return file_visible[0]
     return None
 
 
@@ -32,32 +41,36 @@ def print_graph(entities, relations):
         'abstractMethod': 'lightgray',
         'field': 'lightblue'
     }
-    G = nx.DiGraph()
+    graph = nx.DiGraph()
 
     # Add nodes to the graph
     for entity in entities:
-        G.add_node(str(entity), entity_type=entity.type)
+        graph.add_node(str(entity), entity_type=entity.type)
 
     # Add edges to the graph
     for relation in relations:
-        G.add_edge(str(relation.entity_from), str(relation.entity_to),
-                   label=relation.relation_type)
+        graph.add_edge(str(relation.entity_from), str(relation.entity_to),
+                       label=relation.relation_type)
 
     # Use the spring layout to position nodes
-    pos = nx.spring_layout(G, k=1,
-                           iterations=100)  # k controls the distance between nodes
+    pos = nx.spring_layout(graph, k=1, iterations=100)
 
     plt.figure(figsize=(12, 8))
 
+    for node in graph.nodes:
+        if 'entity_type' not in graph.nodes[node]:
+            print(node)
+
     # Draw the nodes and edges
-    node_colors = [entity_colors[G.nodes[node]['entity_type']] for node in
-                   G.nodes]
-    nx.draw(G, pos, with_labels=True, node_size=3000, node_color=node_colors,
+    node_colors = [entity_colors[graph.nodes[node]['entity_type']] for node in
+                   graph.nodes]
+    nx.draw(graph, pos, with_labels=True, node_size=3000,
+            node_color=node_colors,
             font_size=10, font_weight="bold", arrows=True)
 
     # Draw the edge labels
-    edge_labels = nx.get_edge_attributes(G, 'label')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels,
+    edge_labels = nx.get_edge_attributes(graph, 'label')
+    nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels,
                                  font_color='red', font_size=8, label_pos=0.5,
                                  rotate=False)
 
@@ -71,180 +84,212 @@ def print_graph(entities, relations):
     plt.show()
 
 
-def build_java_graph(files):
-    initial_entities = {}
+def first_pass(file, first_pass_dict):
+    ast = file.ast
+    package_name = ast.package.name if hasattr(ast, 'package') else None
+    full_file_name = os.path.join(file.relative_path, file.file_name)
 
-    relations = []
+    file_entities = []
+    file_relations = []
+
+    for class_node in file.ast.types:
+        if isinstance(class_node, java_ast_tree.ClassDeclaration):
+            abstract_class = 'abstract' in class_node.modifiers
+            info = {'name': class_node.name}
+            class_entity = AbstractClass(info=info, node=class_node,
+                                         package=package_name,
+                                         file=full_file_name) if abstract_class else Class(
+                info=info, node=class_node, package=package_name,
+                file=full_file_name)
+
+            file_entities.append(class_entity)
+            add_node_to_dict(first_pass_dict, class_node.name,
+                             class_entity)
+
+            for member_node in class_node.body:
+                if isinstance(member_node, java_ast_tree.MethodDeclaration):
+                    info = {'modifiers': member_node.modifiers,
+                            'name': member_node.name}
+                    if abstract_class and 'abstract' in member_node.modifiers:
+                        method_entity = AbstractMethod(info=info,
+                                                       node=member_node,
+                                                       package=package_name,
+                                                       file=full_file_name)
+                    else:
+                        method_entity = Method(info=info, node=member_node,
+                                               package=package_name,
+                                               file=full_file_name)
+
+                    file_entities.append(method_entity)
+                    add_node_to_dict(first_pass_dict, member_node.name,
+                                     method_entity)
+                    file_relations.append(Has(class_entity, method_entity))
+                elif isinstance(member_node, java_ast_tree.FieldDeclaration):
+                    for field in member_node.declarators:
+                        info = {'modifiers': member_node.modifiers,
+                                'name': field.name,
+                                'type': member_node.type.name}
+                        field_entity = Field(info=info, node=member_node,
+                                             package=package_name,
+                                             file=full_file_name)
+                        file_entities.append(field_entity)
+                        add_node_to_dict(first_pass_dict, field.name,
+                                         field_entity)
+                        file_relations.append(Has(class_entity, field_entity))
+                elif isinstance(member_node,
+                                java_ast_tree.ConstructorDeclaration):
+                    info = {'modifiers': member_node.modifiers,
+                            'name': f'{class_node.name} Constructor'}
+                    constructor_entity = Constructor(info=info,
+                                                     node=member_node,
+                                                     package=package_name,
+                                                     file=full_file_name)
+                    file_entities.append(constructor_entity)
+                    add_node_to_dict(first_pass_dict, info['name'],
+                                     constructor_entity)
+                    file_relations.append(
+                        Has(class_entity, constructor_entity))
+
+        elif isinstance(class_node, java_ast_tree.InterfaceDeclaration):
+            info = {'name': class_node.name}
+            interface_entity = Interface(info=info, node=class_node,
+                                         package=package_name,
+                                         file=full_file_name)
+
+            file_entities.append(interface_entity)
+            add_node_to_dict(first_pass_dict, class_node.name,
+                             interface_entity)
+
+            for member_node in class_node.body:
+                info = {'name': member_node.name,
+                        'modifiers': member_node.modifiers}
+                if isinstance(member_node, java_ast_tree.MethodDeclaration):
+                    method_entity = AbstractMethod(info=info, node=member_node,
+                                                   package=package_name,
+                                                   file=full_file_name)
+
+                    file_entities.append(method_entity)
+                    add_node_to_dict(first_pass_dict, member_node.name,
+                                     method_entity)
+                    file_relations.append(Has(interface_entity, method_entity))
+
+        return file_entities, file_relations
+
+
+def build_java_graph(files, display=False):
     entities = []
-
-    file_nodes = {}
+    relations = []
+    first_pass_dict = {}
 
     # Initial Pass
     for file in files:
-        file_nodes[file] = []
-        for node in file.ast.types:
-            if isinstance(node, java_ast_tree.ClassDeclaration):
-                abstract_class = 'abstract' in node.modifiers
-                class_entity = AbstractClass(node.name, {},
-                                             node) if abstract_class else Class(
-                    node.name, {}, node)
+        file_entities, file_relations = first_pass(file, first_pass_dict)
+        entities.extend(file_entities)
+        relations.extend(file_relations)
 
-                entities.append(class_entity)
-                file_nodes[file].append(class_entity)
-                add_node_to_dict(initial_entities, class_entity.name,
-                                 class_entity)
-
-                for member in node.body:
-                    if isinstance(member, java_ast_tree.MethodDeclaration):
-                        info = {'modifiers': member.modifiers}
-
-                        if abstract_class and 'abstract' in member.modifiers:
-                            method_entity = AbstractMethod(member.name, info,
-                                                           member)
-                        else:
-                            method_entity = Method(member.name, info, member)
-
-                        entities.append(method_entity)
-                        file_nodes[file].append(method_entity)
-                        add_node_to_dict(initial_entities, method_entity.name,
-                                         method_entity)
-                        relations.append(Has(class_entity, method_entity))
-
-                    elif isinstance(member,
-                                    java_ast_tree.FieldDeclaration):
-                        info = {'modifiers': member.modifiers,
-                                'type': member.type.name}
-                        for field in member.declarators:
-                            field_entity = Field(field.name, info, member)
-                            entities.append(field_entity)
-                            file_nodes[file].append(field_entity)
-                            add_node_to_dict(initial_entities,
-                                             field_entity.name,
-                                             field_entity)
-                            relations.append(Has(class_entity, field_entity))
-
-                    elif isinstance(member,
-                                    java_ast_tree.ConstructorDeclaration):
-                        info = {'modifiers': member.modifiers}
-                        constructor_entity = Constructor(
-                            member.name + ' constructor', info,
-                            member)
-                        entities.append(constructor_entity)
-                        file_nodes[file].append(constructor_entity)
-                        add_node_to_dict(initial_entities,
-                                         constructor_entity.name,
-                                         constructor_entity)
-                        relations.append(Has(class_entity, constructor_entity))
-
-            elif isinstance(node, java_ast_tree.InterfaceDeclaration):
-                interface_entity = Interface(node.name, {},
-                                             node)
-                entities.append(interface_entity)
-                file_nodes[file].append(interface_entity)
-                add_node_to_dict(initial_entities,
-                                 interface_entity.name,
-                                 interface_entity)
-                for member in node.body:
-                    if isinstance(member, java_ast_tree.MethodDeclaration):
-                        method_entity = AbstractMethod(member.name, {}, member)
-                        entities.append(method_entity)
-                        file_nodes[file].append(method_entity)
-                        add_node_to_dict(initial_entities,
-                                         method_entity.name,
-                                         method_entity)
-                        relations.append(Has(interface_entity, method_entity))
-
-        # print_graph(file_nodes[file], relations)
+        if display:
+            print_graph(file_entities, file_relations)
 
     for entity in entities:
         node = entity.node
         if entity.type == 'class' or entity.type == 'abstractClass':
+            # AbstractClass/Class - Extends
             if node.extends is not None:
-                related_entity = find_in_dict(initial_entities,
-                                              node.extends.name,
-                                              entity)
+                related_entity = find_in_dict(node.extends.name,
+                                              first_pass_dict, entity)
                 if related_entity is not None:
                     relations.append(Extends(entity, related_entity))
+            # AbstractClass/Class - Implements
             if node.implements is not None and len(node.implements) > 0:
                 for imp in node.implements:
-                    related_entity = find_in_dict(initial_entities,
-                                                  imp.name,
+                    related_entity = find_in_dict(imp.name, first_pass_dict,
                                                   entity)
                     if related_entity is not None:
                         relations.append(Implements(entity, related_entity))
         elif entity.type == 'interface':
+            # Interface - Extends
             if node.extends is not None and len(node.extends) > 0:
                 for ext in node.extends:
-                    related_entity = find_in_dict(initial_entities,
-                                                  ext.name,
+                    related_entity = find_in_dict(ext.name, first_pass_dict,
                                                   entity)
                     if related_entity is not None:
                         relations.append(Extends(entity, related_entity))
+        elif entity.type == 'abstractMethod' or entity.type == 'method':
+            # AbstractMethod/Method - Parameter
+            if node.parameters is not None and len(node.parameters) > 0:
+                for param in node.parameters:
+                    if isinstance(param.type, java_ast_tree.ReferenceType):
+                        related_entity = find_in_dict(param.type.name,
+                                                      first_pass_dict, entity)
+                        if related_entity is not None:
+                            relations.append(
+                                ParameterOfType(entity, related_entity))
+            # AbstractMethod/Method - ReturnType
+            if node.return_type is not None:
+                if isinstance(node.return_type,
+                              java_ast_tree.ReferenceType):
+                    related_entity = find_in_dict(node.return_type.name,
+                                                  first_pass_dict, entity)
+                    if related_entity is not None:
+                        relations.append(
+                            HasReturnType(entity, related_entity))
+            if entity.type == 'method':
+                # Method - Overrides
+                for owner in entity.in_relations['composes']:
+                    for interface_entity in owner.out_relations['implements']:
+                        for member in interface_entity.out_relations['has']:
+                            if member.type == 'abstractMethod':
+                                # ADD TYPE CHECK
+                                if member.info['name'] == entity.info['name']:
+                                    relations.append(Overrides(entity, member))
+                    for interface_entity in owner.out_relations['extends']:
+                        for member in interface_entity.out_relations['has']:
+                            if member.type in ['abstractMethod', 'method']:
+                                # ADD TYPE CHECK
+                                if member.info['name'] == entity.info['name']:
+                                    relations.append(Overrides(entity, member))
+                # Method - Invokes
+                for member in node.body:
+                    for _, member_node in member:
+                        if isinstance(member_node,
+                                      java_ast_tree.MethodInvocation):
+                            related_entity = find_in_dict(member_node.member,
+                                                          first_pass_dict,
+                                                          entity)
+                            if related_entity is not None:
+                                relations.append(
+                                    Invokes(entity, related_entity))
         elif entity.type == 'field':
+            # Field - Type
             if isinstance(node.type, java_ast_tree.ReferenceType):
-                related_entity = find_in_dict(initial_entities,
-                                              node.type.name,
+                related_entity = find_in_dict(node.type.name, first_pass_dict,
                                               entity)
                 if related_entity is not None:
                     relations.append(
                         IsOfType(entity, related_entity))
         elif entity.type == 'constructor':
+            # Constructor - Parameters
             if node.parameters is not None and len(node.parameters) > 0:
                 for param in node.parameters:
                     if isinstance(param.type, java_ast_tree.ReferenceType):
-                        related_entity = find_in_dict(initial_entities,
-                                                      param.type.name,
-                                                      entity)
+                        related_entity = find_in_dict(param.type.name,
+                                                      first_pass_dict, entity)
                         if related_entity is not None:
                             relations.append(
                                 ParameterOfType(entity, related_entity))
-
-        elif entity.type == 'method':
-            if node.parameters is not None and len(node.parameters) > 0:
-                for param in node.parameters:
-                    if isinstance(param.type, java_ast_tree.ReferenceType):
-                        related_entity = find_in_dict(initial_entities,
-                                                      param.type.name,
-                                                      entity)
-                        if related_entity is not None:
-                            relations.append(
-                                ParameterOfType(entity, related_entity))
-            if node.return_type is not None:
-                if isinstance(node.return_type, java_ast_tree.ReferenceType):
-                    related_entity = find_in_dict(initial_entities,
-                                                  node.return_type.name,
-                                                  entity)
-                    if related_entity is not None:
-                        relations.append(
-                            HasReturnType(entity, related_entity))
+            # Constructor - Invokes
             for member in node.body:
                 for _, member_node in member:
-                    if isinstance(member_node, java_ast_tree.MethodInvocation):
-                        related_entity = find_in_dict(initial_entities,
-                                                      member_node.member,
+                    if isinstance(member_node,
+                                  java_ast_tree.MethodInvocation):
+                        related_entity = find_in_dict(member_node.member,
+                                                      first_pass_dict,
                                                       entity)
-                        relations.append(
-                            Invokes(entity, related_entity))
+                        if related_entity is not None:
+                            relations.append(
+                                Invokes(entity, related_entity))
 
-        elif entity.type == 'abstractMethod':
-            if node.parameters is not None and len(node.parameters) > 0:
-                for param in node.parameters:
-                    if isinstance(param.type, java_ast_tree.ReferenceType):
-                        related_entity = find_in_dict(initial_entities,
-                                                      param.type.name,
-                                                      entity)
-                        if related_entity is not None:
-                            relations.append(
-                                ParameterOfType(entity, related_entity))
-                if node.return_type is not None:
-                    if isinstance(node.return_type,
-                                  java_ast_tree.ReferenceType):
-                        related_entity = find_in_dict(initial_entities,
-                                                      node.return_type.name,
-                                                      entity)
-                        if related_entity is not None:
-                            relations.append(
-                                HasReturnType(entity, related_entity))
-    # print_graph(entities, relations)
+    if display:
+        print_graph(entities, relations)
 
     return {'entities': entities, 'relations': relations}
