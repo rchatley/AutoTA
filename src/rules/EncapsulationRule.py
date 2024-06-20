@@ -68,3 +68,6 @@ class EncapsulationRule(Rule):
                     f'field is not private')
 
         return feedback
+
+    def __str__(self):
+        return f'-Encapsulation Rule'

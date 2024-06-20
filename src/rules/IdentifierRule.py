@@ -28,3 +28,6 @@ class IdentifierRule(Rule):
                 f'{name}, does not follow the specified naming convention.')
 
         return feedback
+
+    def __str__(self):
+        return f'-Identifer Rule'
