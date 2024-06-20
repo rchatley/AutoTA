@@ -7,7 +7,7 @@ from src.project.Spec import build_spec
 if __name__ == "__main__":
     api_key = None
     if len(sys.argv) < 3:
-        repo_dir = 'test/sed_repos/java/SED3'
+        repo_dir = 'test/example_task/'
         spec = build_spec("")
 
     elif len(sys.argv) < 4:
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         api_key = sys.argv[3]
         spec = build_spec(spec_file)
 
-    project = ReviewProject(repo_dir, spec, er_scope='src/main/')
+    project = ReviewProject(repo_dir, spec, er_scope='main')
     project.print_feedback()
 
     if api_key is not None:
