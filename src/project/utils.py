@@ -1,7 +1,10 @@
 from openai import OpenAI
 
+from src.project.FeedbackPDF import FeedbackPDF
 
-def get_llm_summary(project, api_key=None, api_key_file=None):
+
+def gpt_api_request(project_files, project_feedback, api_key=None,
+                    api_key_file=None):
     if api_key is None:
         if api_key_file is None:
             return "No API key provided"
@@ -9,9 +12,9 @@ def get_llm_summary(project, api_key=None, api_key_file=None):
             with open(api_key_file, "r") as f:
                 api_key = f.read()
 
-    feedback = "".join(project.feedback)
+    feedback = "".join(project_feedback)
     contents = "".join(
-        [file.file_name + ': ' + file.contents for file in project.files])
+        [file.file_name + ': ' + file.contents for file in project_files])
     try:
         client = OpenAI(api_key=api_key)
         completion = client.chat.completions.create(
@@ -36,4 +39,11 @@ def get_llm_summary(project, api_key=None, api_key_file=None):
         return completion.choices[0].message.content
 
     except Exception as e:
-        return f"An error occurred: {e}"
+        return None
+
+
+def create_feedback_pdf(code_files, task, summary):
+    feedback_pdf = FeedbackPDF(task=task, summary=summary)
+    for file in code_files:
+        feedback_pdf.add_code_with_feedback(file)
+    feedback_pdf.output(f'{task} Feedback.pdf')

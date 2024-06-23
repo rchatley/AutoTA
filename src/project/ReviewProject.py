@@ -3,6 +3,7 @@ import os
 from src.entity_relations.JavaGraph import build_java_graph
 from src.entity_relations.PythonGraph import build_python_graph
 from src.project.ReviewFile import ReviewFile
+from src.project.utils import create_feedback_pdf, gpt_api_request
 from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
 
@@ -13,6 +14,7 @@ class ReviewProject:
         self.directory = directory
         self.spec = spec
         self.files = []
+        self.summary = None
 
         lang_ext_dict = {'java': 'java', 'python': 'py'}
         file_extension = lang_ext_dict[spec.language]
@@ -55,7 +57,10 @@ class ReviewProject:
             for file in self.files:
                 feedback = rule.apply(file)
                 if feedback:
-                    rule_feedback.extend(feedback)
+                    file.feedback.extend(feedback)
+                    rule_feedback.extend(
+                        [f'File: {file.file_name}, Line: {line}: {text}' for
+                         line, text in feedback])
             if not rule_feedback:
                 if isinstance(rule, EncapsulationRule):
                     complete_feedback.append(
@@ -89,3 +94,9 @@ class ReviewProject:
         else:
             for feedback in self.feedback:
                 print(feedback)
+
+    def get_llm_summary(self, api_key):
+        self.summary = gpt_api_request(self.files, self.feedback, api_key)
+
+    def build_pdf(self):
+        create_feedback_pdf(self.files, self.spec.task, self.summary)
