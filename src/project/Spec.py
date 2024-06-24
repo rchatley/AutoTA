@@ -7,7 +7,7 @@ from src.rules.IdentifierRule import IdentifierRule
 def build_spec(spec_file):
     task = 'Cryptography Task'
     language = 'java'
-    rules = [EncapsulationRule(scope=('dir', 'src/main')), IdentifierRule(
+    rules = [EncapsulationRule(scope=('dir', 'main')), IdentifierRule(
         node_filter=JavaFilter(node_class='method',
                                node_annotations=[
                                    'Test'],
