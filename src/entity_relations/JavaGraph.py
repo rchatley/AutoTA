@@ -235,15 +235,15 @@ def build_java_graph(files, display=False):
                             HasReturnType(entity, related_entity))
             if entity.type == 'method':
                 # Method - Overrides
-                for owner in entity.in_relations['composes']:
-                    for interface_entity in owner.out_relations['implements']:
-                        for member in interface_entity.out_relations['has']:
+                for owner in entity.relations['composes']:
+                    for interface_entity in owner.relations['implements']:
+                        for member in interface_entity.relations['has']:
                             if member.type == 'abstractMethod':
                                 # ADD TYPE CHECK
                                 if member.info['name'] == entity.info['name']:
                                     relations.append(Overrides(entity, member))
-                    for interface_entity in owner.out_relations['extends']:
-                        for member in interface_entity.out_relations['has']:
+                    for interface_entity in owner.relations['extends']:
+                        for member in interface_entity.relations['has']:
                             if member.type in ['abstractMethod', 'method']:
                                 # ADD TYPE CHECK
                                 if member.info['name'] == entity.info['name']:

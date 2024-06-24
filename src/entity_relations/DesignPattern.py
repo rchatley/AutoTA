@@ -18,19 +18,6 @@ def check_dict(dict_a, dict_b):
     return True
 
 
-def relations_contained(pattern_relations, graph_relations):
-    for relation_type in pattern_relations.keys():
-        print(relation_type)
-    return True
-
-
-def entity_expressed(pattern_entity, graph_entity, relations):
-    return not_none_check(pattern_entity.type,
-                          graph_entity.type) and check_dict(
-        pattern_entity.info, graph_entity.info)  # and relations_contained(
-    # relations, graph_entity.relations)
-
-
 class DesignPattern:
     def __init__(self, pattern='singleton'):
         self.pattern = pattern
@@ -102,6 +89,30 @@ class DesignPattern:
                 }
             }
 
+    def relations_contained(self, pattern_relations, graph_relations):
+        if pattern_relations is None:
+            return True
+        for relation_type in pattern_relations.keys():
+            if len(pattern_relations[relation_type]) > len(
+                    graph_relations[relation_type]):
+                return False
+
+            matching_types = [graph_relation.type for graph_relation in
+                              graph_relations[relation_type]]
+
+            for relation in pattern_relations[relation_type]:
+                if self.entity_dict[relation].type not in matching_types:
+                    return False
+
+        return True
+
+    def entity_expressed(self, pattern_entity, graph_entity, relations):
+        return not_none_check(pattern_entity.type,
+                              graph_entity.type) and check_dict(
+            pattern_entity.info,
+            graph_entity.info) and self.relations_contained(
+            relations, graph_entity.relations)
+
     def find_potential_isomorphisms(self, graph):
         node_dict = {}
         missing_nodes = []
@@ -112,8 +123,9 @@ class DesignPattern:
                 from_node_name) if from_node_name in self.relation_dict else None
             potential_isomorphisms = [graph_entity for graph_entity in
                                       graph['entities'] if
-                                      entity_expressed(entity, graph_entity,
-                                                       relations)]
+                                      self.entity_expressed(entity,
+                                                            graph_entity,
+                                                            relations)]
             if len(potential_isomorphisms) == 0:
                 missing_nodes.append(from_node_name)
             else:
@@ -144,7 +156,7 @@ class DesignPattern:
                         for i, matching_to_entity in enumerate(
                                 matching_to_entities):
                             if matching_to_entity in \
-                                    matching_from_entity.out_relations[
+                                    matching_from_entity.relations[
                                         rel_type]:
                                 matched_from = True
                                 ents_to_matches[i] = True
@@ -168,6 +180,9 @@ class DesignPattern:
                             if single_missing_node is not None:
                                 return f'Could not find any potential instances of {self.pattern} pattern'
                             single_missing_node = from_node_name
+
+        if single_missing_node is not None:
+            return f'Implementation of {self.pattern} pattern is almost complete: \n MISSING ENTITY: {single_missing_node}'
 
         return_string = f'Found potential instance of {self.pattern} pattern:\n'
         for node_name, entities in node_dict.items():
