@@ -18,76 +18,89 @@ def check_dict(dict_a, dict_b):
     return True
 
 
+def pattern_library(pattern):
+    pattern_dict = {
+        'singleton':
+            ({
+                 'singleton': Class(),
+                 'private constructor': Constructor(
+                     info={'modifiers': {'private'}}),
+                 'private instance': Field(
+                     info={'modifiers': {'private'}}),
+                 'get_instance': Method()
+             }, {
+                 'singleton': {
+                     'has': ['private constructor',
+                             'private instance',
+                             'get_instance']
+                 },
+                 'private instance': {
+                     'isOfType': ['singleton']
+                 },
+                 'get_instance': {
+                     'hasReturnType': ['singleton']
+                 }
+             }),
+        'templateMethod':
+            ({
+                 'template': AbstractClass(),
+                 'abstract method': AbstractMethod(),
+                 'hook method': Method(),
+                 'subclass': Class(),
+                 'override': Method()
+             },
+             {
+                 'template': {
+                     'has': ['abstract method', 'hook method']
+                 },
+                 'subclass': {
+                     'extends': ['template'],
+                     'has': ['override']
+                 },
+                 'hook method': {
+                     'invokes': ['abstract method']
+                 }
+             }),
+        'strategy':
+            ({
+                 'context': Class(),
+                 'strategy': Interface(),
+                 'strategy_method': AbstractMethod(),
+                 'concrete_strategy_a': Class(),
+                 'concrete_strategy_b': Class(),
+                 'execute_strategy': Method(),
+             },
+             {
+                 'context': {
+                     'has': ['execute_strategy']
+                 },
+                 'strategy': {
+                     'has': ['strategy_method']
+                 },
+                 'concrete_strategy_a': {
+                     'implements': ['strategy']
+                 },
+                 'concrete_strategy_b': {
+                     'implements': ['strategy']
+                 },
+                 'execute_strategy': {
+                     'invokes': ['strategy_method']
+                 }
+             })}
+
+    if pattern in pattern_dict.keys():
+        return pattern_dict[pattern]
+    return None, None
+
+
 class DesignPattern:
     def __init__(self, pattern='singleton'):
         self.pattern = pattern
-        if pattern == 'singleton':
-            self.entity_dict = {
-                'singleton': Class(),
-                'private constructor': Constructor(
-                    info={'modifiers': {'private'}}),
-                'private instance': Field(
-                    info={'modifiers': {'private'}}),
-                'get_instance': Method()
-            }
-            self.relation_dict = {
-                'singleton': {
-                    'has': ['private constructor', 'private instance',
-                            'get_instance']
-                },
-                'private instance': {
-                    'isOfType': ['singleton']
-                },
-                'get_instance': {
-                    'hasReturnType': ['singleton']
-                }
-            }
-        elif pattern == 'templateMethod':
-            self.entity_dict = {
-                'template': AbstractClass(),
-                'abstract method': AbstractMethod(),
-                'hook method': Method(),
-                'subclass': Class(),
-                'override': Method()
-            }
-            self.relation_dict = {
-                'template': {
-                    'has': ['abstract method', 'hook method']
-                },
-                'subclass': {
-                    'extends': ['template'],
-                    'has': ['override']
-                },
-                'hook method': {
-                    'invokes': ['abstract method']
-                }
-            }
-        elif pattern == 'strategy':
-            self.entity_dict = {
-                'context': Class(),
-                'strategy': Interface(),
-                'strategy_method': AbstractMethod(),
-                'concrete_strategy_a': Class(),
-                'concrete_strategy_b': Class(),
-                'execute_strategy': Method(),
-            }
-            self.relation_dict = {
-                'context': {
-                    'has': ['execute_strategy']
-                },
-                'strategy': {
-                    'has': ['strategy_method']
-                },
-                'concrete_strategy_a': {
-                    'implements': ['strategy']
-                },
-                'concrete_strategy_b': {
-                    'implements': ['strategy']
-                },
-                'execute_strategy': {
-                    'invokes': ['strategy_method']
-                }
-            }
+        self.entity_dict, self.relation_dict = pattern_library(pattern)
+
+        if self.entity_dict is None:
+            # Compose pattern
+            pass
 
     def relations_contained(self, pattern_relations, graph_relations):
         if pattern_relations is None:
