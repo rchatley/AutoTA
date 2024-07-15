@@ -24,8 +24,8 @@ class IdentifierRule(Rule):
                 name = get_node_name(node, 'python')
 
             feedback.append(
-                f'{file.file_name}:{line}:{char}: The {self.node_filter.node_class}, '
-                f'{name}, does not follow the specified naming convention.')
+                (line, f'The {self.node_filter.node_class}, '
+                       f'{name}, does not follow the specified naming convention.'))
 
         return feedback
 

@@ -18,89 +18,113 @@ def check_dict(dict_a, dict_b):
     return True
 
 
-def relations_contained(pattern_relations, graph_relations):
-    for relation_type in pattern_relations.keys():
-        print(relation_type)
-    return True
+def pattern_library(pattern):
+    pattern_dict = {
+        'singleton':
+            ({
+                 'singleton': Class(),
+                 'private constructor': Constructor(
+                     info={'modifiers': {'private'}}),
+                 'private instance': Field(
+                     info={'modifiers': {'private'}}),
+                 'get_instance': Method()
+             }, {
+                 'singleton': {
+                     'has': ['private constructor',
+                             'private instance',
+                             'get_instance']
+                 },
+                 'private instance': {
+                     'isOfType': ['singleton']
+                 },
+                 'get_instance': {
+                     'hasReturnType': ['singleton']
+                 }
+             }),
+        'templateMethod':
+            ({
+                 'template': AbstractClass(),
+                 'abstract method': AbstractMethod(),
+                 'template method': Method(),
+                 'subclass': Class(),
+                 'override': Method()
+             },
+             {
+                 'template': {
+                     'has': ['abstract method', 'template method']
+                 },
+                 'subclass': {
+                     'extends': ['template'],
+                     'has': ['override']
+                 },
+                 'template method': {
+                     'invokes': ['abstract method']
+                 }
+             }),
+        'strategy':
+            ({
+                 'context': Class(),
+                 'context_field': Field(),
+                 'strategy': Interface(),
+                 'strategy_method': AbstractMethod(),
+                 'concrete_strategy': Class(),
+                 'concrete_method': Method()
+             },
+             {
+                 'context': {
+                     'has': ['context_field']
+                 },
+                 'strategy': {
+                     'has': ['strategy_method']
+                 },
+                 'concrete_strategy': {
+                     'implements': ['strategy']
+                 },
+                 'context_field': {
+                     'isOfType': ['strategy']
+                 },
+                 'concrete_method': {
+                     'overrides': ['strategy_method']
+                 }
+             })}
 
-
-def entity_expressed(pattern_entity, graph_entity, relations):
-    return not_none_check(pattern_entity.type,
-                          graph_entity.type) and check_dict(
-        pattern_entity.info, graph_entity.info)  # and relations_contained(
-    # relations, graph_entity.relations)
+    if pattern in pattern_dict.keys():
+        return pattern_dict[pattern]
+    return None, None
 
 
 class DesignPattern:
     def __init__(self, pattern='singleton'):
         self.pattern = pattern
-        if pattern == 'singleton':
-            self.entity_dict = {
-                'singleton': Class(),
-                'private constructor': Constructor(
-                    info={'modifiers': {'private'}}),
-                'private instance': Field(
-                    info={'modifiers': {'private'}}),
-                'get_instance': Method()
-            }
-            self.relation_dict = {
-                'singleton': {
-                    'has': ['private constructor', 'private instance',
-                            'get_instance']
-                },
-                'private instance': {
-                    'isOfType': ['singleton']
-                },
-                'get_instance': {
-                    'hasReturnType': ['singleton']
-                }
-            }
-        elif pattern == 'templateMethod':
-            self.entity_dict = {
-                'template': AbstractClass(),
-                'abstract method': AbstractMethod(),
-                'hook method': Method(),
-                'subclass': Class(),
-                'override': Method()
-            }
-            self.relation_dict = {
-                'template': {
-                    'has': ['abstract method', 'hook method']
-                },
-                'subclass': {
-                    'extends': ['template'],
-                    'has': ['override']
-                },
-                'hook method': {
-                    'invokes': ['abstract method']
-                }
-            }
-        elif pattern == 'strategy':
-            self.entity_dict = {
-                'context': Class(),
-                'strategy': Interface(),
-                'strategy_method': AbstractMethod(),
-                'concrete_strategy_a': Class(),
-                'concrete_strategy_b': Class(),
-                'execute_strategy': Method(),
-            }
-            self.relation_dict = {
-                'context': {
-                    'has': ['execute_strategy']
-                },
-                'strategy': {
-                    'has': ['strategy_method']
-                },
-                'concrete_strategy_a': {
-                    'implements': ['strategy']
-                },
-                'concrete_strategy_b': {
-                    'implements': ['strategy']
-                },
-                'execute_strategy': {
-                    'invokes': ['strategy_method']
-                }
-            }
+        self.entity_dict, self.relation_dict = pattern_library(pattern)
+
+        if self.entity_dict is None:
+            # Compose pattern
+            pass
+
+    def relations_contained(self, pattern_relations, graph_relations):
+        if pattern_relations is None:
+            return True
+        for relation_type in pattern_relations.keys():
+            if len(pattern_relations[relation_type]) > len(
+                    graph_relations[relation_type]):
+                return False
+
+            matching_types = [graph_relation.type for graph_relation in
+                              graph_relations[relation_type]]
+
+            for relation in pattern_relations[relation_type]:
+                if self.entity_dict[relation].type not in matching_types:
+                    return False
+
+        return True
+
+    def entity_expressed(self, pattern_entity, graph_entity, relations):
+        return not_none_check(pattern_entity.type,
+                              graph_entity.type) and check_dict(
+            pattern_entity.info,
+            graph_entity.info) and self.relations_contained(
+            relations, graph_entity.relations)
 
     def find_potential_isomorphisms(self, graph):
         node_dict = {}
@@ -112,8 +136,9 @@ class DesignPattern:
                 from_node_name) if from_node_name in self.relation_dict else None
             potential_isomorphisms = [graph_entity for graph_entity in
                                       graph['entities'] if
-                                      entity_expressed(entity, graph_entity,
-                                                       relations)]
+                                      self.entity_expressed(entity,
+                                                            graph_entity,
+                                                            relations)]
             if len(potential_isomorphisms) == 0:
                 missing_nodes.append(from_node_name)
             else:
@@ -144,7 +169,7 @@ class DesignPattern:
                         for i, matching_to_entity in enumerate(
                                 matching_to_entities):
                             if matching_to_entity in \
-                                    matching_from_entity.out_relations[
+                                    matching_from_entity.relations[
                                         rel_type]:
                                 matched_from = True
                                 ents_to_matches[i] = True
@@ -168,6 +193,9 @@ class DesignPattern:
                             if single_missing_node is not None:
                                 return f'Could not find any potential instances of {self.pattern} pattern'
                             single_missing_node = from_node_name
+
+        if single_missing_node is not None:
+            return f'Implementation of {self.pattern} pattern is almost complete: \n MISSING ENTITY: {single_missing_node}'
 
         return_string = f'Found potential instance of {self.pattern} pattern:\n'
         for node_name, entities in node_dict.items():

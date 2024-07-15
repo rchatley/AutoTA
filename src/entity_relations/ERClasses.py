@@ -9,38 +9,25 @@ class Entity:
         self.node = node
         self.package = package
         self.file = file
-        self.out_relations = {'has': [],
-                              'extends': [],
-                              'implements': [],
-                              'instantiates': [],
-                              'overrides': [],
-                              'invokes': [],
-                              'parameterOfType': [],
-                              'isOfType': [],
-                              'hasReturnType': []}
-        self.in_relations = {'composes': [],
-                             'extendedBy': [],
-                             'implementedBy': [],
-                             'instantiatedBy': [],
-                             'overridenBy': [],
-                             'invokedBy': [],
-                             'typeOfParameter': [],
-                             'isTypeOf': [],
-                             'isReturnTypeOf': []}
-
-    def out_degree(self):
-        return sum([len(out_relation) for out_relation in
-                    self.out_relations.values()])
-
-    def in_degree(self):
-        return sum([len(in_relation) for in_relation in
-                    self.in_relations.values()])
+        self.relations = {'has': [], 'composes': [],
+                          'extends': [], 'extendedBy': [],
+                          'implements': [], 'implementedBy': [],
+                          'instantiates': [], 'instantiatedBy': [],
+                          'overrides': [], 'overridenBy': [],
+                          'invokes': [], 'invokedBy': [],
+                          'parameterOfType': [], 'typeOfParameter': [],
+                          'isOfType': [], 'isTypeOf': [],
+                          'hasReturnType': [], 'isReturnTypeOf': []}
 
     def __str__(self):
+        if self.info is None or self.info["name"] is None:
+            return f'{self.type}'
         return f'{self.file} : {self.type}: {self.info["name"]}'
 
     def __repr__(self):
-        return f'{self.type} : {self.info["name"]}'
+        if self.info is None or self.info["name"] is None:
+            return f'{self.type}'
+        return f'{self.file} : {self.type}: {self.info["name"]}'
 
 
 class Class(Entity):
@@ -94,61 +81,61 @@ class Relation:
 class Has(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'has')
-        class_entity.out_relations['has'].append(member_entity)
-        member_entity.in_relations['composes'].append(class_entity)
+        class_entity.relations['has'].append(member_entity)
+        member_entity.relations['composes'].append(class_entity)
 
 
 class Implements(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'implements')
-        class_entity.out_relations['implements'].append(member_entity)
-        member_entity.in_relations['implementedBy'].append(class_entity)
+        class_entity.relations['implements'].append(member_entity)
+        member_entity.relations['implementedBy'].append(class_entity)
 
 
 class Extends(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'extends')
-        class_entity.out_relations['extends'].append(member_entity)
-        member_entity.in_relations['extendedBy'].append(class_entity)
+        class_entity.relations['extends'].append(member_entity)
+        member_entity.relations['extendedBy'].append(class_entity)
 
 
 class ParameterOfType(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'parameterOfType')
-        class_entity.out_relations['parameterOfType'].append(member_entity)
-        member_entity.in_relations['typeOfParameter'].append(class_entity)
+        class_entity.relations['parameterOfType'].append(member_entity)
+        member_entity.relations['typeOfParameter'].append(class_entity)
 
 
 class IsOfType(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'isOfType')
-        class_entity.out_relations['isOfType'].append(member_entity)
-        member_entity.in_relations['isTypeOf'].append(class_entity)
+        class_entity.relations['isOfType'].append(member_entity)
+        member_entity.relations['isTypeOf'].append(class_entity)
 
 
 class HasReturnType(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'hasReturnType')
-        class_entity.out_relations['hasReturnType'].append(member_entity)
-        member_entity.in_relations['isReturnTypeOf'].append(class_entity)
+        class_entity.relations['hasReturnType'].append(member_entity)
+        member_entity.relations['isReturnTypeOf'].append(class_entity)
 
 
 class Invokes(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'invokes')
-        class_entity.out_relations['invokes'].append(member_entity)
-        member_entity.in_relations['invokedBy'].append(class_entity)
+        class_entity.relations['invokes'].append(member_entity)
+        member_entity.relations['invokedBy'].append(class_entity)
 
 
 class Overrides(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'overrides')
-        class_entity.out_relations['overrides'].append(member_entity)
-        member_entity.in_relations['overridenBy'].append(class_entity)
+        class_entity.relations['overrides'].append(member_entity)
+        member_entity.relations['overridenBy'].append(class_entity)
 
 
 class Instantiates(Relation):
     def __init__(self, class_entity, member_entity):
         super().__init__(class_entity, member_entity, 'instantiates')
-        class_entity.out_relations['instantiates'].append(member_entity)
-        member_entity.in_relations['instantiatedBy'].append(class_entity)
+        class_entity.relations['instantiates'].append(member_entity)
+        member_entity.relations['instantiatedBy'].append(class_entity)

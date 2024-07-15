@@ -28,9 +28,9 @@ class EncapsulationRule(Rule):
                 for field in visible_fields:
                     line, char = field.position
                     feedback.append(
-                        f'{file.file_name}:{line}:{char}: In class'
-                        f' {ast_class.name}, the {field.declarators[0].name} '
-                        f'field is not private')
+                        (line, f'In class'
+                               f' {ast_class.name}, the {field.declarators[0].name} '
+                               f'field is not private'))
 
                 if self._getters:
                     pass

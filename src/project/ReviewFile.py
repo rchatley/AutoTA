@@ -9,6 +9,7 @@ class ReviewFile:
         self.root = root
         self.relative_path = relative_path
         self.file_name = file_name
+        self.feedback = []
 
         if contents is None:
             with open(os.path.join(root, file_name), 'r') as file:
