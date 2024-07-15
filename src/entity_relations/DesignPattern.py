@@ -45,46 +45,46 @@ def pattern_library(pattern):
             ({
                  'template': AbstractClass(),
                  'abstract method': AbstractMethod(),
-                 'hook method': Method(),
+                 'template method': Method(),
                  'subclass': Class(),
                  'override': Method()
              },
              {
                  'template': {
-                     'has': ['abstract method', 'hook method']
+                     'has': ['abstract method', 'template method']
                  },
                  'subclass': {
                      'extends': ['template'],
                      'has': ['override']
                  },
-                 'hook method': {
+                 'template method': {
                      'invokes': ['abstract method']
                  }
              }),
         'strategy':
             ({
                  'context': Class(),
+                 'context_field': Field(),
                  'strategy': Interface(),
                  'strategy_method': AbstractMethod(),
-                 'concrete_strategy_a': Class(),
-                 'concrete_strategy_b': Class(),
-                 'execute_strategy': Method(),
+                 'concrete_strategy': Class(),
+                 'concrete_method': Method()
              },
              {
                  'context': {
-                     'has': ['execute_strategy']
+                     'has': ['context_field']
                  },
                  'strategy': {
                      'has': ['strategy_method']
                  },
-                 'concrete_strategy_a': {
+                 'concrete_strategy': {
                      'implements': ['strategy']
                  },
-                 'concrete_strategy_b': {
-                     'implements': ['strategy']
+                 'context_field': {
+                     'isOfType': ['strategy']
                  },
-                 'execute_strategy': {
-                     'invokes': ['strategy_method']
+                 'concrete_method': {
+                     'overrides': ['strategy_method']
                  }
              })}
 
