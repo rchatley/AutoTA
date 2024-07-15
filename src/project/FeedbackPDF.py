@@ -31,7 +31,7 @@ class FeedbackPDF(FPDF):
         self.cell(0, 10, f'Author: {author}', 0, 1, 'C')
         self.cell(0, 10, f'Date: {datetime.now().date()}', 0, 1, 'C')
         if summary is not None:
-            self.set_font('Arial', '', 12)
+            self.set_font('Arial', '', 10)
             self.ln(20)
             self.multi_cell(0, 10, summary, 0, 'C')
 
