@@ -35,15 +35,17 @@ def gpt_api_request(project_files, project_feedback, api_key=None,
                             "and potential improvements."}
             ]
         )
-
+        print('-GPT API Request Successfully Made')
         return completion.choices[0].message.content
 
     except Exception as e:
         return None
 
 
-def create_feedback_pdf(code_files, task, summary):
+def create_feedback_pdf(code_files, task, summary, name):
     feedback_pdf = FeedbackPDF(task=task, summary=summary)
     for file in code_files:
         feedback_pdf.add_code_with_feedback(file)
-    feedback_pdf.output(f'{task} Feedback.pdf')
+    feedback_pdf.output(f'{name} Task Feedback.pdf')
+    print()
+    print(f'{name} Task Feedback.pdf created')

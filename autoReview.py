@@ -19,8 +19,10 @@ if __name__ == "__main__":
         api_key = sys.argv[3]
 
     spec = build_spec(spec_file)
+    print('-Specification Built Successfully')
     project = ReviewProject(repo_dir, spec, er_scope='main')
-
+    print('-Project Built Successfully')
+    project.print_feedback()
     if api_key is not None:
         project.get_llm_summary(api_key)
 
