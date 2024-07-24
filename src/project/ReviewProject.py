@@ -8,37 +8,43 @@ from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
 
 
+def gather_files_from(directory, file_extension):
+    files = []
+    for root, _, dir_files in os.walk(directory):
+        for file_name in dir_files:
+            if file_name.endswith(f'.{file_extension}'):
+                files.append(ReviewFile(root, os.path.relpath(root, directory), file_name))
+    return files
+
+
+file_extensions_by_language = {'java': 'java',
+                               'python': 'py'}
+
+
 class ReviewProject:
 
-    def __init__(self, directory, spec, er_scope=None):
+    def __init__(self, directory, spec, scope_restriction=None):
         self.directory = directory
         self.spec = spec
         self.files = []
         self.summary = None
 
-        lang_ext_dict = {'java': 'java', 'python': 'py'}
-        file_extension = lang_ext_dict[spec.language]
+        file_extension = file_extensions_by_language[spec.language]
 
-        for root, _, dir_files in os.walk(directory):
-            for file_name in dir_files:
-                if file_name.endswith(f'.{file_extension}'):
-                    self.files.append(
-                        ReviewFile(root, os.path.relpath(root, directory),
-                                   file_name))
+        self.files = gather_files_from(directory, file_extension)
+        self.er_graph = self.build_graph_of_code(scope_restriction, spec)
+        self.feedback = self.perform_analysis()
 
-        if er_scope is None:
-            self.er_graph = self.build_er_graph(self.files)
+    def build_graph_of_code(self, scope_restriction, spec):
+        if scope_restriction is None:
+            return self.build_er_graph(self.files, spec)
         else:
-            scope_dir = os.path.normpath(er_scope)
-            scoped_files = [file for file in self.files if
-                            os.path.commonpath(
-                                [os.path.normpath(file.relative_path),
-                                 scope_dir]) == scope_dir]
-            self.er_graph = self.build_er_graph(scoped_files)
+            scope_dir = os.path.normpath(scope_restriction)
+            scoped_files = self.files_within(scope_dir)
 
-        self.feedback = self.get_feedback()
+            return self.build_er_graph(scoped_files, spec)
 
-    def get_feedback(self):
+    def perform_analysis(self):
         if self.spec is None:
             return []
         feedback = []
@@ -82,10 +88,10 @@ class ReviewProject:
 
         return pattern_feedback
 
-    def build_er_graph(self, files):
-        if self.spec.language == 'java':
+    def build_er_graph(self, files, spec):
+        if spec.language == 'java':
             return build_java_graph(files)
-        elif self.spec.language == 'python':
+        elif spec.language == 'python':
             return build_python_graph(files)
 
     def print_er_graph(self):
@@ -107,3 +113,8 @@ class ReviewProject:
     def build_pdf(self):
         create_feedback_pdf(self.files, self.spec.task, self.summary,
                             self.directory)
+
+    def files_within(self, scope_dir):
+        scoped_files = [file for file in self.files if
+                        os.path.commonpath([os.path.normpath(file.relative_path), scope_dir]) == scope_dir]
+        return scoped_files
