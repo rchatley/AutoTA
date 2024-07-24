@@ -1,6 +1,6 @@
 import os
 
-from src.entity_relations.JavaGraph import build_java_graph
+from src.entity_relations.JavaGraph import build_java_graph, print_graph
 from src.entity_relations.PythonGraph import build_python_graph
 from src.project.ReviewFile import ReviewFile
 from src.project.utils import create_feedback_pdf, gpt_api_request
@@ -87,6 +87,12 @@ class ReviewProject:
             return build_java_graph(files)
         elif self.spec.language == 'python':
             return build_python_graph(files)
+
+    def print_er_graph(self):
+        if self.spec.language == 'java':
+            print_graph(self.er_graph['entities'], self.er_graph['relations'])
+        else:
+            print("Sorry, can only print Java graphs just now.")
 
     def print_feedback(self):
         if not self.feedback:
