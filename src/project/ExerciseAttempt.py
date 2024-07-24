@@ -21,19 +21,17 @@ file_extensions_by_language = {'java': 'java',
                                'python': 'py'}
 
 
-class ReviewProject:
+class ExerciseAttempt:
 
     def __init__(self, directory, spec, scope_restriction=None):
         self.directory = directory
+        self.files = gather_files_from(directory, file_extensions_by_language[spec.language])
         self.spec = spec
-        self.files = []
-        self.summary = None
 
-        file_extension = file_extensions_by_language[spec.language]
-
-        self.files = gather_files_from(directory, file_extension)
         self.er_graph = self.build_graph_of_code(scope_restriction, spec)
-        self.feedback = self.perform_analysis()
+
+        self.summary = None
+        self.feedback = None
 
     def build_graph_of_code(self, scope_restriction, spec):
         if scope_restriction is None:
@@ -53,7 +51,7 @@ class ReviewProject:
         if self.spec.patterns is not None:
             feedback.extend(self.find_patterns(self.spec.patterns))
 
-        return feedback
+        self.feedback = feedback
 
     def apply_rules(self, rules):
         complete_feedback = ["CODE STYLE RULES:"]

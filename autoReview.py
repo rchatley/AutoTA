@@ -1,6 +1,6 @@
 import sys
 
-from src.project.ReviewProject import ReviewProject
+from src.project.ExerciseAttempt import ExerciseAttempt
 from src.project.Spec import build_spec
 
 if __name__ == "__main__":
@@ -23,16 +23,15 @@ if __name__ == "__main__":
         api_key = sys.argv[3]
 
     spec = build_spec(spec_file)
-    print('-Specification Built Successfully')
-    project = ReviewProject(repo_dir, spec)
-    print('-Project Built Successfully')
 
-    project.print_er_graph()
+    attempt = ExerciseAttempt(repo_dir, spec)
 
-    project.print_feedback()
+    attempt.print_er_graph()
+    attempt.perform_analysis()
+    attempt.print_feedback()
 
     if api_key is not None:
-        project.get_llm_summary(api_key)
+        attempt.get_llm_summary(api_key)
 
     if False:
-        project.build_pdf()
+        attempt.build_pdf()
