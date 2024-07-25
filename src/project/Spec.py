@@ -4,7 +4,7 @@ from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
 
 
-def build_spec(spec_file):
+def example_template_method_spec():
     task = 'Cryptography Task'
     rules = [EncapsulationRule(scope=('dir', 'main')), IdentifierRule(
         node_filter=JavaFilter(node_class='method',

@@ -1,28 +1,26 @@
 import sys
 
 from src.project.ExerciseAttempt import ExerciseAttempt
-from src.project.Spec import build_spec
+from src.project.Spec import example_template_method_spec
 
 if __name__ == "__main__":
-    repo_dir, spec_file, api_key = None, None, None
-    if len(sys.argv) == 0:
+    repo_dir, api_key = None, None
+    if len(sys.argv) == 1:
         # Internal Testing
         repo_dir = 'test/example_task/'
-        spec = build_spec("")
-    elif len(sys.argv) < 3:
+        spec = example_template_method_spec()
+    elif len(sys.argv) == 2:
         print("Source directory " + sys.argv[1])
         repo_dir = sys.argv[1]
-        spec = build_spec("")
-    elif len(sys.argv) < 4:
-        # Command Line
+        spec = example_template_method_spec()
+    elif len(sys.argv) == 3:
         repo_dir = sys.argv[1]
-        spec_file = sys.argv[2]
-    elif len(sys.argv) < 5:
-        repo_dir = sys.argv[1]
-        spec_file = sys.argv[2]
-        api_key = sys.argv[3]
+        api_key = sys.argv[2]
+    else:
+        print("Usage: python autoReview.py [source_directory] [api_key]")
+        sys.exit(1)
 
-    spec = build_spec(spec_file)
+    spec = example_template_method_spec()
 
     attempt = ExerciseAttempt(repo_dir, spec)
 
