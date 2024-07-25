@@ -1,11 +1,12 @@
 import os.path
+from collections import defaultdict
 
 import javalang.tree as java_ast_tree
 import networkx as nx
 from matplotlib import pyplot as plt
 
 from src.entity_relations.ERClasses import *
-from src.entity_relations.utils import add_node_to_dict, find_in_dict
+from src.entity_relations.utils import find_in_dict
 
 
 def print_graph(entities, relations):
@@ -80,8 +81,7 @@ def first_pass(file, first_pass_dict):
                 file=full_file_name)
 
             file_entities.append(class_entity)
-            add_node_to_dict(first_pass_dict, class_node.name,
-                             class_entity)
+            first_pass_dict[class_node.name].append(class_entity)
 
             for member_node in class_node.body:
                 if isinstance(member_node, java_ast_tree.MethodDeclaration):
@@ -98,8 +98,7 @@ def first_pass(file, first_pass_dict):
                                                file=full_file_name)
 
                     file_entities.append(method_entity)
-                    add_node_to_dict(first_pass_dict, member_node.name,
-                                     method_entity)
+                    first_pass_dict[member_node.name].append(method_entity)
                     file_relations.append(Has(class_entity, method_entity))
                 elif isinstance(member_node, java_ast_tree.FieldDeclaration):
                     for field in member_node.declarators:
@@ -110,8 +109,7 @@ def first_pass(file, first_pass_dict):
                                              package=package_name,
                                              file=full_file_name)
                         file_entities.append(field_entity)
-                        add_node_to_dict(first_pass_dict, field.name,
-                                         field_entity)
+                        first_pass_dict[field.name].append(field_entity)
                         file_relations.append(Has(class_entity, field_entity))
                 elif isinstance(member_node,
                                 java_ast_tree.ConstructorDeclaration):
@@ -122,8 +120,7 @@ def first_pass(file, first_pass_dict):
                                                      package=package_name,
                                                      file=full_file_name)
                     file_entities.append(constructor_entity)
-                    add_node_to_dict(first_pass_dict, info['name'],
-                                     constructor_entity)
+                    first_pass_dict[info['name']].append(constructor_entity)
                     file_relations.append(
                         Has(class_entity, constructor_entity))
 
@@ -134,8 +131,7 @@ def first_pass(file, first_pass_dict):
                                          file=full_file_name)
 
             file_entities.append(interface_entity)
-            add_node_to_dict(first_pass_dict, class_node.name,
-                             interface_entity)
+            first_pass_dict[class_node.name].append(interface_entity)
 
             for member_node in class_node.body:
                 info = {'name': member_node.name,
@@ -146,8 +142,7 @@ def first_pass(file, first_pass_dict):
                                                    file=full_file_name)
 
                     file_entities.append(method_entity)
-                    add_node_to_dict(first_pass_dict, member_node.name,
-                                     method_entity)
+                    first_pass_dict[member_node.name].append(method_entity)
                     file_relations.append(Has(interface_entity, method_entity))
 
         return file_entities, file_relations
@@ -156,7 +151,8 @@ def first_pass(file, first_pass_dict):
 def build_code_graph(files, display=False):
     entities = []
     relations = []
-    first_pass_dict = {}
+
+    first_pass_dict = defaultdict(list)
 
     # Initial Pass
     for file in files:

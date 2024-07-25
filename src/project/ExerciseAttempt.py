@@ -44,8 +44,8 @@ class ExerciseAttempt:
         feedback = []
         if self.spec.rules is not None:
             feedback = self.apply_rules(self.spec.rules)
-        if self.spec.patterns is not None:
-            feedback.extend(self.find_patterns(self.spec.patterns))
+        if self.spec.structures is not None:
+            feedback.extend(self.find_structures(self.spec.structures))
 
         self.feedback = feedback
 
@@ -73,14 +73,12 @@ class ExerciseAttempt:
         complete_feedback.append("")
         return complete_feedback
 
-    def find_patterns(self, patterns):
-        pattern_feedback = ["EXPECTED STRUCTURES:"]
-        for pattern in patterns:
-            pattern_feedback.append('-' + pattern.pattern + '\n' +
-                                    pattern.find_potential_isomorphisms(
-                                        self.er_graph))
-
-        return pattern_feedback
+    def find_structures(self, structures):
+        structure_feedback = ["EXPECTED STRUCTURES:"]
+        for structure in structures:
+            structure_feedback.append('-' + structure.name + '\n' +
+                                      structure.find_potential_isomorphisms(self.er_graph))
+        return structure_feedback
 
     def print_er_graph(self):
         print_graph(self.er_graph['entities'], self.er_graph['relations'])

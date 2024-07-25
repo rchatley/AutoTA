@@ -1,4 +1,4 @@
-from src.entity_relations.DesignPattern import DesignPattern
+from src.entity_relations.DesignPattern import pattern_library
 from src.filters.JavaFilter import JavaFilter
 from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
@@ -11,7 +11,7 @@ def build_spec(spec_file):
                                node_annotations=[
                                    'Test'],
                                node_name=r"^test"))]
-    patterns = [DesignPattern('templateMethod')]
+    patterns = [pattern_library('templateMethod')]
 
     return Spec(task, rules=rules, structures=patterns)
 
