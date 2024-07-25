@@ -13,7 +13,7 @@ def build_spec(spec_file):
                                node_name=r"^test"))]
     patterns = [DesignPattern('templateMethod')]
 
-    return Spec(task, rules=rules, patterns=patterns)
+    return Spec(task, rules=rules, structures=patterns)
 
 
 # def build_spec(spec_file):
@@ -30,7 +30,7 @@ def build_spec(spec_file):
 
 
 class Spec:
-    def __init__(self, task, rules=None, patterns=None):
+    def __init__(self, task, rules=None, structures=None):
         self.task = task
         self.rules = rules
-        self.patterns = patterns
+        self.structures = structures

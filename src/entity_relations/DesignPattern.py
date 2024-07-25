@@ -18,7 +18,7 @@ def check_dict(dict_a, dict_b):
     return True
 
 
-def pattern_library(pattern):
+def pattern_structure(pattern_name):
     pattern_dict = {
         'singleton':
             ({
@@ -88,19 +88,15 @@ def pattern_library(pattern):
                  }
              })}
 
-    if pattern in pattern_dict.keys():
-        return pattern_dict[pattern]
+    if pattern_name in pattern_dict.keys():
+        return pattern_dict[pattern_name]
     return None, None
 
 
 class DesignPattern:
-    def __init__(self, pattern='singleton'):
-        self.pattern = pattern
-        self.entity_dict, self.relation_dict = pattern_library(pattern)
-
-        if self.entity_dict is None:
-            # Compose pattern
-            pass
+    def __init__(self, pattern_name='singleton'):
+        self.name = pattern_name
+        self.entity_dict, self.relation_dict = pattern_structure(pattern_name)
 
     def relations_contained(self, pattern_relations, graph_relations):
         if pattern_relations is None:
@@ -146,7 +142,7 @@ class DesignPattern:
 
         single_missing_node = None
         if len(missing_nodes) > 1:
-            return f'Could not find any potential instances of {self.pattern} pattern'
+            return f'Could not find any potential instances of {self.name} pattern'
         elif len(missing_nodes) == 1:
             single_missing_node = missing_nodes[0]
             node_dict[missing_nodes[0]] = [Entity()]
@@ -184,20 +180,20 @@ class DesignPattern:
                         node_dict[to_node_name].remove(to_ent)
                         if not node_dict[to_node_name]:
                             if single_missing_node is not None:
-                                return f'Could not find any potential instances of {self.pattern} pattern'
+                                return f'Could not find any potential instances of {self.name} pattern'
                             single_missing_node = to_node_name
 
                     for from_ent in from_ents_to_remove:
                         node_dict[from_node_name].remove(from_ent)
                         if not node_dict[from_node_name]:
                             if single_missing_node is not None:
-                                return f'Could not find any potential instances of {self.pattern} pattern'
+                                return f'Could not find any potential instances of {self.name} pattern'
                             single_missing_node = from_node_name
 
         if single_missing_node is not None:
-            return f'Implementation of {self.pattern} pattern is almost complete: \n MISSING ENTITY: {single_missing_node}'
+            return f'Implementation of {self.name} pattern is almost complete: \n MISSING ENTITY: {single_missing_node}'
 
-        return_string = f'Found potential instance of {self.pattern} pattern:\n'
+        return_string = f'Found potential instance of {self.name} pattern:\n'
         for node_name, entities in node_dict.items():
             if len(entities) == 1:
                 return_string += ' -' + node_name.upper() + ':\n' + str(
