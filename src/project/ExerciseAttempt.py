@@ -1,7 +1,6 @@
 import os
 
-from src.entity_relations.JavaGraph import build_java_graph, print_graph
-from src.entity_relations.PythonGraph import build_python_graph
+from src.entity_relations.JavaGraph import build_code_graph, print_graph
 from src.project.ReviewFile import ReviewFile
 from src.project.utils import create_feedback_pdf, gpt_api_request
 from src.rules.EncapsulationRule import EncapsulationRule
@@ -17,15 +16,11 @@ def gather_files_from(directory, file_extension):
     return files
 
 
-file_extensions_by_language = {'java': 'java',
-                               'python': 'py'}
-
-
 class ExerciseAttempt:
 
     def __init__(self, directory, spec, scope_restriction=None):
         self.directory = directory
-        self.files = gather_files_from(directory, file_extensions_by_language[spec.language])
+        self.files = gather_files_from(directory, "java")
         self.spec = spec
 
         self.er_graph = self.build_graph_of_code(scope_restriction, spec)
@@ -35,16 +30,17 @@ class ExerciseAttempt:
 
     def build_graph_of_code(self, scope_restriction, spec):
         if scope_restriction is None:
-            return self.build_er_graph(self.files, spec)
+            return build_code_graph(self.files)
         else:
             scope_dir = os.path.normpath(scope_restriction)
             scoped_files = self.files_within(scope_dir)
 
-            return self.build_er_graph(scoped_files, spec)
+            return build_code_graph(scoped_files)
 
     def perform_analysis(self):
         if self.spec is None:
-            return []
+            self.feedback = []
+            return
         feedback = []
         if self.spec.rules is not None:
             feedback = self.apply_rules(self.spec.rules)
@@ -78,7 +74,7 @@ class ExerciseAttempt:
         return complete_feedback
 
     def find_patterns(self, patterns):
-        pattern_feedback = ["DESIGN PATTERNS:"]
+        pattern_feedback = ["EXPECTED STRUCTURES:"]
         for pattern in patterns:
             pattern_feedback.append('-' + pattern.pattern + '\n' +
                                     pattern.find_potential_isomorphisms(
@@ -86,17 +82,8 @@ class ExerciseAttempt:
 
         return pattern_feedback
 
-    def build_er_graph(self, files, spec):
-        if spec.language == 'java':
-            return build_java_graph(files)
-        elif spec.language == 'python':
-            return build_python_graph(files)
-
     def print_er_graph(self):
-        if self.spec.language == 'java':
-            print_graph(self.er_graph['entities'], self.er_graph['relations'])
-        else:
-            print("Sorry, can only print Java graphs just now.")
+        print_graph(self.er_graph['entities'], self.er_graph['relations'])
 
     def print_feedback(self):
         if not self.feedback:

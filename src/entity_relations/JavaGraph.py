@@ -153,7 +153,7 @@ def first_pass(file, first_pass_dict):
         return file_entities, file_relations
 
 
-def build_java_graph(files, display=False):
+def build_code_graph(files, display=False):
     entities = []
     relations = []
     first_pass_dict = {}
