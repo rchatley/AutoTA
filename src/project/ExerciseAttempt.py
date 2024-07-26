@@ -1,7 +1,10 @@
 import os
+from typing import List
 
+from src.entity_relations import JavaGraph
 from src.entity_relations.JavaGraph import build_code_graph, print_graph
 from src.project.JavaFile import JavaFile
+from src.project.Spec import Spec
 from src.project.utils import create_feedback_pdf, gpt_api_request
 from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
@@ -17,8 +20,11 @@ def gather_files_from(directory, file_extension) -> list[JavaFile]:
 
 
 class ExerciseAttempt:
+    spec: Spec
+    files: list[JavaFile]
+    er_graph: JavaGraph
 
-    def __init__(self, directory, spec, scope_restriction=None):
+    def __init__(self, directory, spec: Spec, scope_restriction: str = None):
         self.directory = directory
         self.files = gather_files_from(directory, "java")
         self.spec = spec
@@ -28,7 +34,7 @@ class ExerciseAttempt:
         self.summary = None
         self.feedback = None
 
-    def build_graph_of_code(self, scope_restriction):
+    def build_graph_of_code(self, scope_restriction) -> JavaGraph:
         if scope_restriction is None:
             return build_code_graph(self.files)
         else:
