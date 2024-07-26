@@ -1,5 +1,4 @@
 import os
-import ast as python_ast
 import javalang as java_ast
 
 
@@ -17,14 +16,5 @@ class ReviewFile:
         else:
             self.contents = contents
 
-        extension = os.path.splitext(file_name)[1]
-
-        if extension == '.py':
-            self.language = 'python'
-            self.ast = python_ast.parse(self.contents)
-        elif extension == '.java':
-            self.language = 'java'
-            tokens = list(java_ast.tokenizer.tokenize(self.contents))
-            self.ast = java_ast.parser.Parser(tokens).parse()
-        else:
-            self.ast = None
+        tokens = list(java_ast.tokenizer.tokenize(self.contents))
+        self.ast = java_ast.parser.Parser(tokens).parse()
