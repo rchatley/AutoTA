@@ -1,7 +1,7 @@
 import os
 
 from src.entity_relations.JavaGraph import build_code_graph, print_graph
-from src.project.ReviewFile import ReviewFile
+from src.project.JavaFile import JavaFile
 from src.project.utils import create_feedback_pdf, gpt_api_request
 from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
@@ -12,7 +12,7 @@ def gather_files_from(directory, file_extension):
     for root, _, dir_files in os.walk(directory):
         for file_name in dir_files:
             if file_name.endswith(f'.{file_extension}'):
-                files.append(ReviewFile(root, os.path.relpath(root, directory), file_name))
+                files.append(JavaFile(root, os.path.relpath(root, directory), file_name))
     return files
 
 

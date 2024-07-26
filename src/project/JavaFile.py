@@ -2,7 +2,7 @@ import os
 import javalang as java_ast
 
 
-class ReviewFile:
+class JavaFile:
 
     def __init__(self, root, relative_path, file_name, contents=None):
         self.root = root
