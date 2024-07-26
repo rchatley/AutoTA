@@ -1,4 +1,6 @@
+from src.entity_relations.CodeStructure import CodeStructure
 from src.entity_relations.DesignPattern import pattern_library
+from src.entity_relations.ERClasses import Class, Constructor, Field, Interface
 from src.filters.JavaFilter import JavaFilter
 from src.rules.AccessModifierCheck import AccessModifierCheck
 from src.rules.EncapsulationRule import EncapsulationRule
@@ -29,9 +31,42 @@ def camera_exercise_spec():
 
         IdentifierRule(scope=('dir', 'src/test/java'),
                        node_filter=JavaFilter(node_class='method', node_annotations=['Test'], node_name=r"^test"))]
-    patterns = []
+    structures = [
+        CodeStructure("Core Camera implementation",
+                      {
+                          'Camera': Class(),
+                          'Sensor': Interface(info={'name': {'Sensor'}}),
+                          'MemoryCard': Interface(info={'name': {'MemoryCard'}}),
+                          'constructor': Constructor(info={'modifiers': {'public'}}),
+                          'sensor field': Field(info={'modifiers': {'private', 'final'}}),
+                          'memory card field': Field(info={'modifiers': {'private', 'final'}}),
+                      }, {
+                          'Camera': {
+                              'has': ['constructor',
+                                      'sensor field',
+                                      'memory card field'],
+                          },
+                          'sensor field': {
+                              'isOfType': ['Sensor'],
+                          },
+                          'memory card field': {
+                              'isOfType': ['MemoryCard'],
+                          },
+                      },
+                      "The Camera should have fields for the Sensor and MemoryCard", ),
+        CodeStructure("WriteListener",
+                      {
+                          'Camera': Class(),
+                          'WriteListener': Interface(),
+                      }, {
+                          'WriteListener': {
+                              'implementedBy': ['Camera'],
+                          },
+                      },
+                      "The Camera should implement the WriteListener interface"),
+    ]
 
-    return Spec(task, rules=rules, structures=patterns)
+    return Spec(task, rules=rules, structures=structures)
 
 
 # def build_spec(spec_file):

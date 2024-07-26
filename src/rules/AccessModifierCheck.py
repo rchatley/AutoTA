@@ -23,9 +23,6 @@ class AccessModifierCheck(Rule):
                                          negatives=['node_modifiers'])
                               .get_nodes(ast_class))
 
-            print("Found fields...")
-            print(visible_fields)
-
             for field in visible_fields:
                 line, char = field.position
                 feedback.append(

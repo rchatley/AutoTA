@@ -27,7 +27,7 @@ class Entity:
     def __repr__(self):
         if self.info is None or self.info["name"] is None:
             return f'{self.type}'
-        return f'{self.file} : {self.type}: {self.info["name"]}'
+        return f'{self.file} : {self.type} : {self.info["name"]}'
 
 
 class Class(Entity):

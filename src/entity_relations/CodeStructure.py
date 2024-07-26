@@ -5,13 +5,17 @@ def not_none_check(a, b):
     return a is None or a == b
 
 
-def check_dict(dict_a, dict_b):
+def attributes_contained(dict_a, dict_b):
     if dict_a is None:
         return True
     if dict_b is None:
         return False
     for k, vs in dict_a.items():
         if k == 'modifiers':
+            for v in vs:
+                if v not in dict_b[k]:
+                    return False
+        if k == 'name':
             for v in vs:
                 if v not in dict_b[k]:
                     return False
@@ -44,7 +48,7 @@ class CodeStructure:
 
     def entity_expressed(self, pattern_entity, graph_entity, relations):
         return (not_none_check(pattern_entity.type, graph_entity.type)
-                and check_dict(pattern_entity.info, graph_entity.info)
+                and attributes_contained(pattern_entity.info, graph_entity.info)
                 and self.relations_contained(relations, graph_entity.relations))
 
     def find_potential_isomorphisms(self, graph):
@@ -53,13 +57,12 @@ class CodeStructure:
 
         # Find all potential nodes for each entity
         for from_node_name, entity in self.entities.items():
-            relations = self.relations.get(
-                from_node_name) if from_node_name in self.relations else None
-            potential_isomorphisms = [graph_entity for graph_entity in
-                                      graph['entities'] if
-                                      self.entity_expressed(entity,
-                                                            graph_entity,
-                                                            relations)]
+
+            relations = self.relations.get(from_node_name)
+
+            potential_isomorphisms = [graph_entity for graph_entity in graph['entities']
+                                      if self.entity_expressed(entity, graph_entity, relations)]
+
             if len(potential_isomorphisms) == 0:
                 missing_nodes.append(from_node_name)
             else:
