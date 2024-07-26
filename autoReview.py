@@ -8,11 +8,9 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         # Internal Testing
         repo_dir = 'test/example_task/'
-        spec = example_template_method_spec()
     elif len(sys.argv) == 2:
         print("Source directory " + sys.argv[1])
         repo_dir = sys.argv[1]
-        spec = example_template_method_spec()
     elif len(sys.argv) == 3:
         repo_dir = sys.argv[1]
         api_key = sys.argv[2]
@@ -24,12 +22,11 @@ if __name__ == "__main__":
 
     attempt = ExerciseAttempt(repo_dir, spec)
 
-    attempt.print_er_graph()
+    # attempt.print_er_graph()
+
     attempt.perform_analysis()
     attempt.print_feedback()
 
     if api_key is not None:
         attempt.get_llm_summary(api_key)
-
-    if False:
         attempt.build_pdf()

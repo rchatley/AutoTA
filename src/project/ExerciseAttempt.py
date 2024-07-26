@@ -7,7 +7,7 @@ from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
 
 
-def gather_files_from(directory, file_extension):
+def gather_files_from(directory, file_extension) -> list[JavaFile]:
     files = []
     for root, _, dir_files in os.walk(directory):
         for file_name in dir_files:
@@ -23,24 +23,18 @@ class ExerciseAttempt:
         self.files = gather_files_from(directory, "java")
         self.spec = spec
 
-        self.er_graph = self.build_graph_of_code(scope_restriction, spec)
+        self.er_graph = self.build_graph_of_code(scope_restriction)
 
         self.summary = None
         self.feedback = None
 
-    def build_graph_of_code(self, scope_restriction, spec):
+    def build_graph_of_code(self, scope_restriction):
         if scope_restriction is None:
             return build_code_graph(self.files)
         else:
-            scope_dir = os.path.normpath(scope_restriction)
-            scoped_files = self.files_within(scope_dir)
-
-            return build_code_graph(scoped_files)
+            return build_code_graph(self._files_within(scope_restriction))
 
     def perform_analysis(self):
-        if self.spec is None:
-            self.feedback = []
-            return
         feedback = []
         if self.spec.rules is not None:
             feedback = self.apply_rules(self.spec.rules)
@@ -97,7 +91,8 @@ class ExerciseAttempt:
         create_feedback_pdf(self.files, self.spec.task, self.summary,
                             self.directory)
 
-    def files_within(self, scope_dir):
+    def _files_within(self, scope_restriction) -> list[JavaFile]:
+        scope_dir = os.path.normpath(scope_restriction)
         scoped_files = [file for file in self.files if
                         os.path.commonpath([os.path.normpath(file.relative_path), scope_dir]) == scope_dir]
         return scoped_files

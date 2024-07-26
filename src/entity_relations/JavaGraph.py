@@ -1,4 +1,3 @@
-import os.path
 from collections import defaultdict
 
 import javalang.tree as java_ast_tree
@@ -67,7 +66,7 @@ def first_pass(java_file: JavaFile, first_pass_dict):
 
     package_name = java_file.package_name()
 
-    full_file_name = full_file_path(java_file)
+    full_file_name = java_file.full_file_path()
 
     file_entities = []
     file_relations = []
