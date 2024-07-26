@@ -31,7 +31,28 @@ def camera_exercise_spec():
 
         IdentifierRule(scope=('dir', 'src/test/java'),
                        node_filter=JavaFilter(node_class='method', node_annotations=['Test'], node_name=r"^test"))]
+
     structures = [
+        CodeStructure("JMock Test",
+                      entities={
+                          'Test': Class(),
+                          'Camera': Class(),
+                          'mockery': Field(),
+                          'object under test': Field(),
+                      },
+                      relations={
+                          'Test': {
+                              'has': ['mockery', 'object under test'],
+                          },
+                          'object under test': {
+                              'isOfType': ['Camera']
+                          },
+                          # 'mockery': {
+                          #     'isOfType': ['JUnitRuleMockery']
+                          # }
+                      },
+                      description="The Camera should be tested by mocking out its collaborators",
+                      ),
         CodeStructure("Core Camera implementation",
                       {
                           'Camera': Class(),
