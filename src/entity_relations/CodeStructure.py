@@ -119,7 +119,8 @@ class CodeStructure:
                             single_missing_node = from_node_name
 
         if single_missing_node is not None:
-            return f'Implementation of {self.name} pattern is almost complete: \n MISSING ENTITY: {single_missing_node}'
+            return (f'Implementation of {self.name} pattern is almost complete: \n MISSING ENTITY: {single_missing_node}'
+                    f' \n {self.description}')
 
         return_string = f'Found potential instance of {self.name} pattern:\n'
         for node_name, entities in node_dict.items():
