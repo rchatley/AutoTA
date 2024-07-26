@@ -16,7 +16,7 @@ class IdentifierRule(Rule):
         feedback = []
         for node in self.node_filter.get_nodes(ast):
             line, char = node.position
-            name = get_node_name(node, 'java')
+            name = get_node_name(node)
 
             feedback.append(
                 (line, f'The {self.node_filter.node_class}, '

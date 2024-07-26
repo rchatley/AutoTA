@@ -6,10 +6,8 @@ from src.rules.Rule import Rule
 
 # Checks that all classes within scope are Encapsulated
 class EncapsulationRule(Rule):
-    def __init__(self, scope='project', getters=False, setters=False):
+    def __init__(self, scope='project'):
         super().__init__(scope)
-        self._getters = getters
-        self._setters = setters
 
     def apply(self, file):
         ast = self.file_filter(file)
@@ -21,8 +19,7 @@ class EncapsulationRule(Rule):
             visible_fields = JavaFilter(node_class='field',
                                         node_modifiers=['private'],
                                         negatives=[
-                                            'node_modifiers']).get_nodes(
-                ast_class)
+                                            'node_modifiers']).get_nodes(ast_class)
 
             for field in visible_fields:
                 line, char = field.position

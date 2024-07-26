@@ -1,7 +1,7 @@
 import sys
 
 from src.project.ExerciseAttempt import ExerciseAttempt
-from src.project.Spec import example_template_method_spec
+from src.project.Spec import example_template_method_spec, camera_exercise_spec
 
 if __name__ == "__main__":
     repo_dir, api_key = None, None
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         print("Usage: python autoReview.py [source_directory] [api_key]")
         sys.exit(1)
 
-    spec = example_template_method_spec()
+    spec = camera_exercise_spec()
 
     attempt = ExerciseAttempt(repo_dir, spec)
 

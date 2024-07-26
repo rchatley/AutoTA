@@ -16,6 +16,16 @@ def example_template_method_spec():
     return Spec(task, rules=rules, structures=patterns)
 
 
+def camera_exercise_spec():
+    task = 'Mock Objects - Camera'
+    rules = [EncapsulationRule(scope=('dir', 'src/main/java')),
+             IdentifierRule(scope=('dir', 'src/test/java'),
+                            node_filter=JavaFilter(node_class='method', node_annotations=['Test'], node_name=r"^test"))]
+    patterns = []
+
+    return Spec(task, rules=rules, structures=patterns)
+
+
 # def build_spec(spec_file):
 #     task = 'Cryptography Task'
 #     language = 'java'

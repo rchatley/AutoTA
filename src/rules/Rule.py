@@ -1,3 +1,4 @@
+import abc
 import os
 
 
@@ -28,5 +29,6 @@ class Rule:
         print('Invalid scope given')
         return file.ast
 
+    @abc.abstractmethod
     def apply(self, review_file):
         return NotImplementedError
