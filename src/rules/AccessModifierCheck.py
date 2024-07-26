@@ -5,9 +5,10 @@ from src.rules.Rule import Rule
 
 
 class AccessModifierCheck(Rule):
-    def __init__(self, scope='project', expected_modifiers=[]):
+    def __init__(self, scope='project', field_type=None, expected_modifiers=[]):
         super().__init__(scope)
         self.expected_modifiers = expected_modifiers
+        self.field_type = field_type
 
     def apply(self, file):
         ast = self.file_filter(file)
@@ -17,6 +18,7 @@ class AccessModifierCheck(Rule):
         feedback = []
         for ast_class in JavaFilter(node_class='class').get_nodes(ast):
             visible_fields = (JavaFilter(node_class='field',
+                                         node_type=self.field_type,
                                          node_modifiers=self.expected_modifiers,
                                          negatives=['node_modifiers'])
                               .get_nodes(ast_class))
