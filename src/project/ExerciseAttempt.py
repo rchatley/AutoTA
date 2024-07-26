@@ -37,15 +37,15 @@ class ExerciseAttempt:
     def perform_analysis(self):
         feedback = []
         if self.spec.rules is not None:
-            feedback = self.apply_rules(self.spec.rules)
+            feedback = self.apply_rules()
         if self.spec.structures is not None:
-            feedback.extend(self.find_structures(self.spec.structures))
+            feedback.extend(self.find_structures())
 
         self.feedback = feedback
 
-    def apply_rules(self, rules):
+    def apply_rules(self):
         complete_feedback = ["CODE STYLE RULES:"]
-        for rule in rules:
+        for rule in self.spec.rules:
             complete_feedback.append(str(rule) + ':')
             rule_feedback = []
             for file in self.files:
@@ -67,9 +67,9 @@ class ExerciseAttempt:
         complete_feedback.append("")
         return complete_feedback
 
-    def find_structures(self, structures):
+    def find_structures(self):
         structure_feedback = ["EXPECTED STRUCTURES:"]
-        for structure in structures:
+        for structure in self.spec.structures:
             structure_feedback.append('-' + structure.name + '\n' +
                                       structure.find_potential_isomorphisms(self.er_graph))
         return structure_feedback
