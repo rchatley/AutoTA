@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 
 from src.entity_relations.ERClasses import *
 from src.entity_relations.utils import find_in_dict
+from src.project.JavaFile import JavaFile
 
 
 def print_graph(entities, relations):
@@ -62,15 +63,16 @@ def print_graph(entities, relations):
     plt.show()
 
 
-def first_pass(file, first_pass_dict):
-    ast = file.ast
-    package_name = ast.package.name if hasattr(ast, 'package') else None
-    full_file_name = os.path.join(file.relative_path, file.file_name)
+def first_pass(java_file: JavaFile, first_pass_dict):
+
+    package_name = java_file.package_name()
+
+    full_file_name = full_file_path(java_file)
 
     file_entities = []
     file_relations = []
 
-    for class_node in file.ast.types:
+    for class_node in java_file.ast.types:
         if isinstance(class_node, java_ast_tree.ClassDeclaration):
             abstract_class = 'abstract' in class_node.modifiers
             info = {'name': class_node.name}
