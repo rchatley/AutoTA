@@ -6,13 +6,19 @@ from src.filters.Filter import Filter
 
 
 class JavaFilter(Filter):
-    def __init__(self, negatives=None, node_class=None, node_name=None,
+    def __init__(self,
+                 negatives=None,
+                 node_class=None,
+                 node_name=None,
                  node_modifiers=None,
-                 node_annotations=None, node_extends=None,
+                 node_annotations=None,
+                 node_extends=None,
                  node_implements=None,
-                 node_type=None, node_return_type=None):
+                 node_type=None,
+                 node_return_type=None):
         super().__init__('java')
 
+        self.negatives = negatives
         self.node_class = node_class
         self.node_name = node_name
         self.node_modifiers = node_modifiers
@@ -21,7 +27,6 @@ class JavaFilter(Filter):
         self.node_implements = node_implements
         self.node_type = node_type
         self.node_return_type = node_return_type
-        self.negatives = negatives
 
         self.class_map = {'node': tree.Node,
                           'class': tree.ClassDeclaration,
@@ -33,7 +38,6 @@ class JavaFilter(Filter):
                           'enum': tree.EnumDeclaration}
 
     def _filter_node_class(self, node):
-
         return isinstance(node, self.class_map[self.node_class])
 
     def _filter_node_name(self, node):
@@ -57,7 +61,7 @@ class JavaFilter(Filter):
         if self.negatives is None or 'node_modifiers' not in self.negatives:
             return set(self.node_modifiers).issubset(set(node.modifiers))
         else:
-            return set(self.node_modifiers).isdisjoint(set(node.modifiers))
+            return not set(self.node_modifiers).issubset(set(node.modifiers))
 
     def _filter_node_annotations(self, node):
         if self.node_annotations is None or len(self.node_annotations) == 0:
@@ -103,11 +107,11 @@ class JavaFilter(Filter):
         return all([
             self._filter_node_class(node),
             self._filter_node_name(node),
-            self._filter_node_modifiers(node),
             self._filter_node_annotations(node),
             self._filter_node_extends(node),
             self._filter_node_implements(node),
             self._filter_node_type(node),
+            self._filter_node_modifiers(node),
             self._filter_node_return_type(node)
         ])
 

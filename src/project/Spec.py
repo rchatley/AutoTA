@@ -1,5 +1,6 @@
 from src.entity_relations.DesignPattern import pattern_library
 from src.filters.JavaFilter import JavaFilter
+from src.rules.AccessModifierCheck import AccessModifierCheck
 from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
 
@@ -18,7 +19,7 @@ def example_template_method_spec():
 
 def camera_exercise_spec():
     task = 'Mock Objects - Camera'
-    rules = [EncapsulationRule(scope=('dir', 'src/main/java')),
+    rules = [AccessModifierCheck(scope=('dir', 'src/main/java'), expected_modifiers=['private', 'final']),
              IdentifierRule(scope=('dir', 'src/test/java'),
                             node_filter=JavaFilter(node_class='method', node_annotations=['Test'], node_name=r"^test"))]
     patterns = []
