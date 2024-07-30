@@ -29,4 +29,5 @@ if __name__ == "__main__":
 
     if api_key is not None:
         attempt.get_llm_summary(api_key)
-        attempt.build_pdf()
+
+    attempt.build_pdf()

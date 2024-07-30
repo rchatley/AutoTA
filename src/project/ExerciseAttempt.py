@@ -31,7 +31,7 @@ class ExerciseAttempt:
 
         self.er_graph = self.build_graph_of_code(scope_restriction)
 
-        self.summary = None
+        self.summary = ""
         self.feedback = None
 
     def build_graph_of_code(self, scope_restriction) -> JavaGraph:
@@ -94,7 +94,7 @@ class ExerciseAttempt:
         self.summary = gpt_api_request(self.files, self.feedback, api_key)
 
     def build_pdf(self):
-        create_feedback_pdf(self.files, self.spec.task, self.summary,
+        create_feedback_pdf(self.files, self.spec.task, self.summary + "\n\n" + "\n".join(self.feedback),
                             self.directory)
 
     def _files_within(self, scope_restriction) -> list[JavaFile]:
