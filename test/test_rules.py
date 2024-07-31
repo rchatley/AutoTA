@@ -16,7 +16,7 @@ class TestRules(unittest.TestCase):
             }
         }
         """
-        file = JavaFile('./', "", 'example.java', contents=code)
+        file = JavaFile('./', 'example.java', contents=code)
         results = EncapsulationRule().apply(file)
 
         self.assertEqual(results, [])
@@ -30,7 +30,7 @@ class TestRules(unittest.TestCase):
             }
         }
         """
-        file = JavaFile('./', "", 'example.java', contents=code)
+        file = JavaFile('./', 'example.java', contents=code)
         results = EncapsulationRule().apply(file)
 
         self.assertEqual(len(results), 1)
@@ -44,7 +44,7 @@ class TestRules(unittest.TestCase):
             }
         }
         """
-        file = JavaFile('./', "", 'example.java', contents=code)
+        file = JavaFile('./', 'example.java', contents=code)
         results = IdentifierRule(node_filter=JavaFilter(node_class='method',
                                                         node_name=r"^test")).apply(file)
 
@@ -59,7 +59,7 @@ class TestRules(unittest.TestCase):
             }
         }
         """
-        file = JavaFile('./', "", 'example.java', contents=code)
+        file = JavaFile('./', 'example.java', contents=code)
         results = IdentifierRule(node_filter=JavaFilter(node_class='method',
                                                         node_name=r"^test")).apply(file)
 

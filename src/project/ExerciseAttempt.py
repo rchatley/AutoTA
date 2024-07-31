@@ -1,5 +1,5 @@
 import os
-from typing import List
+from git import Repo
 
 from src.entity_relations import JavaGraph
 from src.entity_relations.JavaGraph import build_code_graph, print_graph
@@ -12,11 +12,54 @@ from src.rules.IdentifierRule import IdentifierRule
 
 def gather_files_from(directory, file_extension) -> list[JavaFile]:
     files = []
-    for root, _, dir_files in os.walk(directory):
-        for file_name in dir_files:
-            if file_name.endswith(f'.{file_extension}'):
-                files.append(JavaFile(root, os.path.relpath(root, directory), file_name))
+    changed_files = list_changed_files(directory)
+    for file_path in changed_files:
+        if file_path.endswith(f'.{file_extension}'):
+            files.append(JavaFile(directory, file_path))
     return files
+
+
+def list_changed_files(repo_path):
+    # Open the repository
+    repo = Repo(repo_path)
+
+    # Ensure the repository is valid
+    if repo.bare:
+        print("The repository is bare, cannot process.")
+        return
+
+    # Get all commits
+    commits = list(repo.iter_commits())
+
+    # Get the first commit
+    first_commit = commits[-1]
+
+    # Initialize a set to store the changed files
+    changed_files = set()
+
+    # Iterate over all commits from the first to the head
+    for commit in commits:
+        if commit == first_commit:
+            break
+        for diff in commit.diff(commit.parents or None):
+            changed_files.add(diff.a_path)
+            if diff.b_path:
+                changed_files.add(diff.b_path)
+
+    # Get uncommitted changes
+    uncommitted_changes = repo.index.diff(None)
+
+    # Add uncommitted changes to the set
+    for diff in uncommitted_changes:
+        changed_files.add(diff.a_path)
+        if diff.b_path:
+            changed_files.add(diff.b_path)
+
+    # Add untracked files to the set
+    untracked_files = repo.untracked_files
+    changed_files.update(untracked_files)
+
+    return changed_files
 
 
 class ExerciseAttempt:

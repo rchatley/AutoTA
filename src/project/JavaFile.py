@@ -8,10 +8,10 @@ class JavaFile:
 
     ast: CompilationUnit
 
-    def __init__(self, root, relative_path: str, file_name: str, contents=None):
+    def __init__(self, root, file_path: str, contents=None):
         self.root = root
-        self.relative_path = relative_path
-        self.file_name = file_name
+        self.file_name = file_path
+        self.relative_path = os.path.relpath(file_path, root)
         self.contents = contents
         self.feedback = []
         self.ast = self._parse_file()
