@@ -36,6 +36,13 @@ class FeedbackPDF(FPDF):
             self.ln(20)
             self.multi_cell(0, 10, summary, 0, 'C')
 
+    def add_commit_summary(self, commit_log):
+        self.add_page()
+        self.set_font('Courier', 'B', 16)
+        self.cell(0, 10, 'Summary of Git Commits', 0, 1, 'C')
+        self.set_font('Courier', '', 12)
+        self.multi_cell(0, 10, commit_log)
+
     def add_code_with_feedback(self, file):
         self.file_name = file.file_name
         self.add_page()

@@ -62,6 +62,32 @@ def list_changed_files(repo_path):
     return changed_files
 
 
+def commit_log(repo_path):
+    output = []
+
+    try:
+        # Open the repository
+        repo = Repo(repo_path)
+
+        # Ensure the repository is valid
+        if repo.bare:
+            output.append("The repository is bare, cannot process.")
+            return
+
+        # Get all commits, starting from the most recent one
+        commits = list(repo.iter_commits(reverse=True))
+
+        # Print the commit messages, skipping the initial commit
+        output.append(f"You made {len(commits) - 1} commits:")
+        for commit in commits[1:]:  # Skip the last commit, which is the initial one
+            output.append(f" - {commit.hexsha[:7]}: {commit.message.strip()}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    return "\n".join(output)
+
+
 class ExerciseAttempt:
     spec: Spec
     files: list[JavaFile]
@@ -137,8 +163,8 @@ class ExerciseAttempt:
         self.summary = gpt_api_request(self.files, self.feedback, api_key)
 
     def build_pdf(self):
-        create_feedback_pdf(self.files, self.spec.task, self.summary + "\n\n" + "\n".join(self.feedback),
-                            self.directory)
+        create_feedback_pdf(self.files, self.spec.task, commit_log(self.directory),
+                            self.summary + "\n\n" + "\n".join(self.feedback), self.directory)
 
     def _files_within(self, scope_restriction) -> list[JavaFile]:
         scope_dir = os.path.normpath(scope_restriction)

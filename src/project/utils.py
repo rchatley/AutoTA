@@ -42,8 +42,9 @@ def gpt_api_request(project_files, project_feedback, api_key=None,
         return None
 
 
-def create_feedback_pdf(code_files, task, summary, name):
+def create_feedback_pdf(code_files, task, commit_log, summary, name):
     feedback_pdf = FeedbackPDF(task=task, summary=summary)
+    feedback_pdf.add_commit_summary(commit_log)
     for file in code_files:
         feedback_pdf.add_code_with_feedback(file)
     feedback_pdf.output(f'{name} Task Feedback.pdf')
