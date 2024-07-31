@@ -164,7 +164,11 @@ class ExerciseAttempt:
 
     def build_pdf(self):
         create_feedback_pdf(self.files, self.spec.task, commit_log(self.directory),
-                            self.summary + "\n\n" + "\n".join(self.feedback), self.directory)
+                            self._feedback(), self.directory)
+
+    def _feedback(self):
+        # return self.summary + "\n\n" + "\n".join(self.feedback)
+        return ""
 
     def _files_within(self, scope_restriction) -> list[JavaFile]:
         scope_dir = os.path.normpath(scope_restriction)
