@@ -112,12 +112,10 @@ class ExerciseAttempt:
     def perform_analysis(self):
         feedback = []
         if self.spec.rules is not None:
-            print("Applying rules")
             feedback = self.apply_rules()
         if self.spec.structures is not None:
             feedback.extend(self.find_structures())
 
-        print("***************" + "\n".join(feedback))
         self.feedback = feedback
 
     def apply_rules(self):
