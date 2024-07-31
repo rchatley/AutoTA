@@ -112,10 +112,12 @@ class ExerciseAttempt:
     def perform_analysis(self):
         feedback = []
         if self.spec.rules is not None:
+            print("Applying rules")
             feedback = self.apply_rules()
         if self.spec.structures is not None:
             feedback.extend(self.find_structures())
 
+        print("***************" + "\n".join(feedback))
         self.feedback = feedback
 
     def apply_rules(self):
@@ -167,8 +169,7 @@ class ExerciseAttempt:
                             self._feedback(), self.directory)
 
     def _feedback(self):
-        # return self.summary + "\n\n" + "\n".join(self.feedback)
-        return ""
+        return self.summary   #+ "\n\n" + "\n".join(self.feedback))
 
     def _files_within(self, scope_restriction) -> list[JavaFile]:
         scope_dir = os.path.normpath(scope_restriction)

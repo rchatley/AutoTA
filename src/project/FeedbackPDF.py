@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from fpdf import FPDF
@@ -47,8 +48,10 @@ class FeedbackPDF(FPDF):
         self.file_name = file.file_name
         self.add_page()
         self.set_font('Courier', '', 8)
-
         feedback_dict = {line_num: fb for line_num, fb in file.feedback}
+        print("--------------------")
+        print(file.file_name)
+        print(file.feedback)
         code_lines = file.contents.split('\n')
 
         for i, line in enumerate(code_lines):

@@ -10,7 +10,8 @@ class JavaFile:
 
     def __init__(self, root, file_path: str, contents=None):
         self.root = root
-        self.file_name = file_path
+        self.file_path = file_path
+        self.file_name = os.path.basename(file_path)
         self.relative_path = os.path.relpath(file_path, root)
         self.contents = contents
         self.feedback = []
@@ -18,7 +19,7 @@ class JavaFile:
 
     def _parse_file(self):
         if self.contents is None:
-            with open(os.path.join(self.root, self.file_name), 'r') as file:
+            with open(os.path.join(self.root, self.file_path), 'r') as file:
                 self.contents = file.read()
 
         tokens = list(java_ast.tokenizer.tokenize(self.contents))
