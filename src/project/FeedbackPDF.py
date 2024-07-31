@@ -56,7 +56,7 @@ class FeedbackPDF(FPDF):
             line_text = line_number + ''.join(map(str, line)).replace("\r", '')
             line_feedback = feedback_dict.get(i + 1)
             if line_feedback:
-                with self.highlight(line_feedback, modification_time=None):
+                with self.highlight(line_feedback, modification_time=None, color=(1, 1, 0)):
                     self.cell(0, self.line_height, line_text, border=0, ln=1)
             else:
                 self.cell(0, self.line_height, line_text, border=0, ln=1)
