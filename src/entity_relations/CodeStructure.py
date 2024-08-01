@@ -23,6 +23,10 @@ def attributes_contained(dict_a, dict_b):
             for v in vs:
                 if v not in dict_b[k]:
                     return False
+        if k == 'annotations':
+            for v in vs:
+                if v not in dict_b[k]:
+                    return False
     return True
 
 
@@ -61,15 +65,11 @@ class CodeStructure:
 
         # Find all potential nodes for each entity
         for from_node_name, entity in self.entities.items():
-            print("Checking relation for entity " + from_node_name)
             relations = self.relations.get(from_node_name)
 
-            print("Relations: " + str(relations))
             potential_isomorphisms = [graph_entity for graph_entity in graph['entities']
                                       if self.entity_expressed(entity, graph_entity, relations)]
-            print("Potential isomorphisms: " + str(potential_isomorphisms))
             if len(potential_isomorphisms) == 0:
-                print("Recording missing node: " + from_node_name)
                 missing_nodes.append(from_node_name)
             else:
                 node_dict[from_node_name] = potential_isomorphisms

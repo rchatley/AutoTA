@@ -37,7 +37,8 @@ def camera_exercise_spec():
                       entities={
                           'Test': Class(),
                           'Camera': Class(),
-                          'mockery': Field(info={'modifiers': {'public'}, 'type': 'JUnitRuleMockery'}),
+                          'mockery': Field(
+                              info={'modifiers': {'public'}, 'type': 'JUnitRuleMockery', 'annotations': {'Rule'}}),
                           'object under test': Field(),
                       },
                       relations={
