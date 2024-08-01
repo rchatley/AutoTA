@@ -77,7 +77,9 @@ def camera_exercise_spec():
                       "The Camera should implement the WriteListener interface"),
     ]
 
-    return Spec(task, rules=rules, structures=structures)
+    additional_files = {'src/main/java/ic/doc/camera/WriteListener.java'}
+
+    return Spec(task, rules=rules, structures=structures, additional_files=additional_files)
 
 
 # def build_spec(spec_file):
@@ -94,7 +96,8 @@ def camera_exercise_spec():
 
 
 class Spec:
-    def __init__(self, task, rules=None, structures=None):
+    def __init__(self, task, rules=None, structures=None, additional_files=set()):
+        self.additional_files = additional_files
         self.task = task
         self.rules = rules
         self.structures = structures

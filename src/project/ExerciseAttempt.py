@@ -10,9 +10,9 @@ from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
 
 
-def gather_files_from(directory, file_extension) -> list[JavaFile]:
+def gather_files_from(directory, file_extension, additonal_files=set()) -> list[JavaFile]:
     files = []
-    changed_files = list_changed_files(directory)
+    changed_files = list_changed_files(directory).union(additonal_files)
     changed_files.add("src/main/java/ic/doc/camera/WriteListener.java")
     for file_path in changed_files:
         if file_path.endswith(f'.{file_extension}'):
@@ -96,7 +96,7 @@ class ExerciseAttempt:
 
     def __init__(self, directory, spec: Spec, scope_restriction: str = None):
         self.directory = directory
-        self.files = gather_files_from(directory, "java")
+        self.files = gather_files_from(directory, "java", spec.additional_files)
         self.spec = spec
 
         self.er_graph = self.build_graph_of_code(scope_restriction)
