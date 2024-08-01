@@ -37,7 +37,7 @@ def camera_exercise_spec():
                       entities={
                           'Test': Class(),
                           'Camera': Class(),
-                          'mockery': Field(),
+                          'mockery': Field(info={'modifiers': {'public'}, 'type': 'JUnitRuleMockery'}),
                           'object under test': Field(),
                       },
                       relations={
@@ -47,32 +47,21 @@ def camera_exercise_spec():
                           'object under test': {
                               'isOfType': ['Camera']
                           },
-                          # 'mockery': {
-                          #     'isOfType': ['JUnitRuleMockery']
-                          # }
                       },
                       description="The Camera should be tested by mocking out its collaborators",
                       ),
         CodeStructure("Core Camera implementation",
                       {
                           'Camera': Class(),
-                          'Sensor': Interface(info={'name': {'Sensor'}}),
-                          'MemoryCard': Interface(info={'name': {'MemoryCard'}}),
                           'constructor': Constructor(info={'modifiers': {'public'}}),
-                          'sensor field': Field(info={'modifiers': {'private', 'final'}}),
-                          'memory card field': Field(info={'modifiers': {'private', 'final'}}),
+                          'sensor field': Field(info={'modifiers': {'private', 'final'}, 'type': 'Sensor'}),
+                          'memory card field': Field(info={'modifiers': {'private', 'final'}, 'type': 'MemoryCard'}),
                       }, {
                           'Camera': {
                               'has': ['constructor',
                                       'sensor field',
                                       'memory card field'],
-                          },
-                          'sensor field': {
-                              'isOfType': ['Sensor'],
-                          },
-                          'memory card field': {
-                              'isOfType': ['MemoryCard'],
-                          },
+                          }
                       },
                       "The Camera should have fields for the Sensor and MemoryCard", ),
         CodeStructure("WriteListener",

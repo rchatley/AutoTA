@@ -105,7 +105,7 @@ def first_pass(java_file: JavaFile, first_pass_dict):
                     for field in member_node.declarators:
                         info = {'modifiers': member_node.modifiers,
                                 'name': field.name,
-                                'type': member_node.type.name}
+                                'type': member_node.type.name }
                         field_entity = Field(info=info, node=member_node,
                                              package=package_name,
                                              file=full_file_name)

@@ -13,13 +13,14 @@ from src.rules.IdentifierRule import IdentifierRule
 def gather_files_from(directory, file_extension) -> list[JavaFile]:
     files = []
     changed_files = list_changed_files(directory)
+    changed_files.add("src/main/java/ic/doc/camera/WriteListener.java")
     for file_path in changed_files:
         if file_path.endswith(f'.{file_extension}'):
             files.append(JavaFile(directory, file_path))
     return files
 
 
-def list_changed_files(repo_path):
+def list_changed_files(repo_path) -> set[str]:
     # Open the repository
     repo = Repo(repo_path)
 
