@@ -13,7 +13,6 @@ from src.rules.IdentifierRule import IdentifierRule
 def gather_files_from(directory, file_extension, additonal_files=set()) -> list[JavaFile]:
     files = []
     changed_files = list_changed_files(directory).union(additonal_files)
-    changed_files.add("src/main/java/ic/doc/camera/WriteListener.java")
     for file_path in changed_files:
         if file_path.endswith(f'.{file_extension}'):
             files.append(JavaFile(directory, file_path))
