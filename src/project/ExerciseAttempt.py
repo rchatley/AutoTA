@@ -1,4 +1,6 @@
 import os
+from typing import List
+
 from git import Repo
 
 from src.entity_relations import JavaGraph
@@ -10,23 +12,14 @@ from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
 
 
-def gather_files_from(directory, file_extension, additonal_files=set()) -> list[JavaFile]:
-    files = []
-    changed_files = list_changed_files(directory).union(additonal_files)
-    for file_path in changed_files:
-        if file_path.endswith(f'.{file_extension}'):
-            files.append(JavaFile(directory, file_path))
-    return files
-
-
-def list_changed_files(repo_path) -> set[str]:
+def list_edited_files(repo_path) -> set[str]:
     # Open the repository
     repo = Repo(repo_path)
 
     # Ensure the repository is valid
     if repo.bare:
         print("The repository is bare, cannot process.")
-        return
+        return set()
 
     # Get all commits
     commits = list(repo.iter_commits())
@@ -90,13 +83,17 @@ def commit_log(repo_path):
 
 class ExerciseAttempt:
     spec: Spec
-    files: list[JavaFile]
+    edited_files: list[JavaFile]
+    additional_types: list[JavaFile]
     er_graph: JavaGraph
 
     def __init__(self, directory, spec: Spec, scope_restriction: str = None):
+
         self.directory = directory
-        self.files = gather_files_from(directory, "java", spec.additional_files)
         self.spec = spec
+        self.edited_files = [JavaFile(directory, f) for f in list_edited_files(directory) if f.endswith('.java')]
+        self.additional_types = [JavaFile(directory, f) for f in spec.additional_files if f.endswith('.java')]
+        self.all_files = self.edited_files + self.additional_types
 
         self.er_graph = self.build_graph_of_code(scope_restriction)
 
@@ -105,7 +102,7 @@ class ExerciseAttempt:
 
     def build_graph_of_code(self, scope_restriction) -> JavaGraph:
         if scope_restriction is None:
-            return build_code_graph(self.files)
+            return build_code_graph(self.all_files)
         else:
             return build_code_graph(self._files_within(scope_restriction))
 
@@ -123,7 +120,7 @@ class ExerciseAttempt:
         for rule in self.spec.rules:
             complete_feedback.append(str(rule) + ':')
             rule_feedback = []
-            for file in self.files:
+            for file in self.edited_files:
                 feedback = rule.apply(file)
                 if feedback:
                     file.feedback.extend(feedback)
@@ -160,17 +157,17 @@ class ExerciseAttempt:
                 print(feedback)
 
     def get_llm_summary(self, api_key):
-        self.summary = gpt_api_request(self.files, self.feedback, api_key)
+        self.summary = gpt_api_request(self.edited_files, self.feedback, api_key)
 
     def build_pdf(self):
-        create_feedback_pdf(self.files, self.spec.task, commit_log(self.directory),
+        create_feedback_pdf(self.edited_files, self.spec.task, commit_log(self.directory),
                             self._feedback(), self.directory)
 
     def _feedback(self):
-        return self.summary   #+ "\n\n" + "\n".join(self.feedback))
+        return self.summary  # + "\n\n" + "\n".join(self.feedback))
 
     def _files_within(self, scope_restriction) -> list[JavaFile]:
         scope_dir = os.path.normpath(scope_restriction)
-        scoped_files = [file for file in self.files if
+        scoped_files = [file for file in self.all_files if
                         os.path.commonpath([os.path.normpath(file.relative_path), scope_dir]) == scope_dir]
         return scoped_files
