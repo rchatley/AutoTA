@@ -1,9 +1,9 @@
 import os
-from typing import List
 
 from git import Repo
 
 from src.entity_relations import JavaGraph
+from src.entity_relations.CodeStructure import SearchResult
 from src.entity_relations.JavaGraph import build_code_graph, print_graph
 from src.project.JavaFile import JavaFile
 from src.project.Spec import Spec
@@ -98,7 +98,8 @@ class ExerciseAttempt:
         self.er_graph = self.build_graph_of_code(scope_restriction)
 
         self.summary = ""
-        self.feedback = None
+        self.rules_feedback = None
+        self.structure_feedback = None
 
     def build_graph_of_code(self, scope_restriction) -> JavaGraph:
         if scope_restriction is None:
@@ -107,13 +108,12 @@ class ExerciseAttempt:
             return build_code_graph(self._files_within(scope_restriction))
 
     def perform_analysis(self):
-        feedback = []
+        self.rules_feedback = []
+        self.structure_feedback = []
         if self.spec.rules is not None:
-            feedback = self.apply_rules()
+            self.rules_feedback = self.apply_rules()
         if self.spec.structures is not None:
-            feedback.extend(self.find_structures())
-
-        self.feedback = feedback
+            self.structure_feedback = self.find_structures()
 
     def apply_rules(self):
         complete_feedback = ["CODE STYLE RULES:"]
@@ -140,31 +140,31 @@ class ExerciseAttempt:
         return complete_feedback
 
     def find_structures(self):
-        structure_feedback = ["EXPECTED STRUCTURES:"]
+        structure_feedback = []
         for structure in self.spec.structures:
-            structure_feedback.append('-' + structure.name + '\n' +
-                                      structure.find_potential_isomorphisms(self.er_graph))
+            result = structure.find_potential_isomorphisms(self.er_graph)
+            if result == SearchResult.FOUND:
+                structure_feedback.append(f'{structure.name}: {structure.description} - GOOD')
+            elif result == SearchResult.CLOSE:
+                structure_feedback.append(f'{structure.name}: Close, that idea was that the {structure.description}')
+            else:
+                structure_feedback.append(f'{structure.name}: '
+                                          f'This does not match the expected structure. The {structure.description}')
+
         return structure_feedback
 
     def print_er_graph(self):
         print_graph(self.er_graph['entities'], self.er_graph['relations'])
 
-    def print_feedback(self):
-        if not self.feedback:
-            print('User code passes all rules')
-        else:
-            for feedback in self.feedback:
-                print(feedback)
-
     def get_llm_summary(self, api_key):
-        self.summary = gpt_api_request(self.edited_files, self.feedback, api_key)
+        self.summary = gpt_api_request(self.edited_files, self.structure_feedback, api_key)
 
     def build_pdf(self):
-        create_feedback_pdf(self.edited_files, self.spec.task, commit_log(self.directory),
-                            self._feedback(), self.directory)
+        create_feedback_pdf(self.edited_files, self.spec.task,
+                            commit_log(self.directory), "\n".join(self.structure_feedback), "SED")
 
     def _feedback(self):
-        return self.summary  # + "\n\n" + "\n".join(self.feedback))
+        return self.summary + "\n\n" + "\n".join(self.structure_feedback)
 
     def _files_within(self, scope_restriction) -> list[JavaFile]:
         scope_dir = os.path.normpath(scope_restriction)

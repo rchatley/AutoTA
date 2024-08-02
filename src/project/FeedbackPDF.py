@@ -13,7 +13,6 @@ class FeedbackPDF(FPDF):
         self.set_font('Courier', '', 8)
         self.line_height = self.font_size * 1.25
         self.set_auto_page_break(auto=True, margin=15)
-        self.cell(0, self.line_height, summary, border=0, ln=1)
 
     def header(self):
         self.set_font('Courier', 'B', 12)

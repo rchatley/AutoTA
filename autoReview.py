@@ -25,7 +25,6 @@ if __name__ == "__main__":
     # attempt.print_er_graph()
 
     attempt.perform_analysis()
-    attempt.print_feedback()
 
     if api_key is not None:
         attempt.get_llm_summary(api_key)

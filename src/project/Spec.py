@@ -22,6 +22,8 @@ def example_template_method_spec():
 
 def camera_exercise_spec():
     task = 'Mock Objects - Camera'
+    overview = ("This idea with this task was to test the behaviour of the camera class "
+                "by mocking out its collaborators.")
     rules = [
         AccessModifierCheck(scope=('dir', 'src/main/java'),
                             expected_modifiers=['private']),
@@ -50,7 +52,7 @@ def camera_exercise_spec():
                               'isOfType': ['Camera']
                           },
                       },
-                      description="The Camera should be tested by mocking out its collaborators",
+                      description="Camera should be tested by mocking out its collaborators",
                       ),
         CodeStructure("Core Camera implementation",
                       {
@@ -65,7 +67,7 @@ def camera_exercise_spec():
                                       'memory card field'],
                           }
                       },
-                      "The Camera should have fields for the Sensor and MemoryCard", ),
+                      "Camera should encapsulate fields for the Sensor and MemoryCard", ),
         CodeStructure("WriteListener",
                       {
                           'Camera': Class(),
@@ -75,12 +77,12 @@ def camera_exercise_spec():
                               'implementedBy': ['Camera'],
                           },
                       },
-                      "The Camera should implement the WriteListener interface"),
+                      "Camera should implement the WriteListener interface as a callback mechanism"),
     ]
 
     additional_files = {'src/main/java/ic/doc/camera/WriteListener.java'}
 
-    return Spec(task, rules=rules, structures=structures, additional_files=additional_files)
+    return Spec(task, overview, rules=rules, structures=structures, additional_files=additional_files)
 
 
 # def build_spec(spec_file):
@@ -97,8 +99,9 @@ def camera_exercise_spec():
 
 
 class Spec:
-    def __init__(self, task, rules=None, structures=None, additional_files=set()):
-        self.additional_files = additional_files
+    def __init__(self, task, overview, rules=None, structures=None, additional_files=set()):
         self.task = task
+        self.overview = overview
         self.rules = rules
         self.structures = structures
+        self.additional_files = additional_files

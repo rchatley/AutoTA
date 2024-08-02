@@ -1,4 +1,12 @@
+from enum import Enum
+
 from src.entity_relations.ERClasses import Entity
+
+
+class SearchResult(Enum):
+    FOUND = 1
+    CLOSE = 2
+    NOT_FOUND = 3
 
 
 def not_none_check(a, b):
@@ -76,7 +84,7 @@ class CodeStructure:
 
         single_missing_node = None
         if len(missing_nodes) > 1:
-            return f'[Missing nodes > 1] Could not find any potential instances of {self.name} pattern'
+            return SearchResult.NOT_FOUND
         elif len(missing_nodes) == 1:
             single_missing_node = missing_nodes[0]
             node_dict[missing_nodes[0]] = [Entity()]
@@ -114,28 +122,27 @@ class CodeStructure:
                         node_dict[to_node_name].remove(to_ent)
                         if not node_dict[to_node_name]:
                             if single_missing_node is not None:
-                                return f'Could not find any potential instances of {self.name} pattern'
+                                return SearchResult.NOT_FOUND
                             single_missing_node = to_node_name
 
                     for from_ent in from_ents_to_remove:
                         node_dict[from_node_name].remove(from_ent)
                         if not node_dict[from_node_name]:
                             if single_missing_node is not None:
-                                return f'Could not find any potential instances of {self.name} pattern'
+                                return SearchResult.NOT_FOUND
                             single_missing_node = from_node_name
 
         if single_missing_node is not None:
-            return (f'Implementation of {self.name} pattern is almost complete: \n MISSING ENTITY: {single_missing_node}'
-                    f' \n {self.description}')
+            return SearchResult.CLOSE
 
-        return_string = f'Found potential instance of {self.name} pattern:\n'
-        for node_name, entities in node_dict.items():
-            if len(entities) == 1:
-                return_string += ' -' + node_name.upper() + ':\n' + str(
-                    entities[0]) + '\n'
-            else:
-                return_string += ' -' + node_name.upper() + ':\n'
-                for entity in entities:
-                    return_string += str(entity) + '\n'
+        # return_string = f'Found potential instance of {self.name} pattern:\n'
+        # for node_name, entities in node_dict.items():
+        #     if len(entities) == 1:
+        #         return_string += ' -' + node_name.upper() + ':\n' + str(
+        #             entities[0]) + '\n'
+        #     else:
+        #         return_string += ' -' + node_name.upper() + ':\n'
+        #         for entity in entities:
+        #             return_string += str(entity) + '\n'
 
-        return return_string
+        return SearchResult.FOUND
