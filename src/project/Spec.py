@@ -25,9 +25,9 @@ def camera_exercise_spec():
         AccessModifierCheck(scope=('dir', 'src/main/java'),
                             expected_modifiers=['private']),
         AccessModifierCheck(scope=('dir', 'src/main/java'), field_type="Sensor",
-                            expected_modifiers=['final']),
+                            expected_modifiers=['private', 'final']),
         AccessModifierCheck(scope=('dir', 'src/main/java'), field_type="MemoryCard",
-                            expected_modifiers=['final']),
+                            expected_modifiers=['private', 'final']),
 
         IdentifierRule(scope=('dir', 'src/test/java'),
                        node_filter=JavaFilter(node_class='method', node_annotations=['Test'], node_name=r"^test"))]
