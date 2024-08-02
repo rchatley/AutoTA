@@ -5,6 +5,7 @@ from src.filters.JavaFilter import JavaFilter
 from src.rules.AccessModifierCheck import AccessModifierCheck
 from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
+from src.rules.JMockSugarCheck import JMockSugarCheck
 
 
 def example_template_method_spec():
@@ -28,7 +29,7 @@ def camera_exercise_spec():
                             expected_modifiers=['private', 'final']),
         AccessModifierCheck(scope=('dir', 'src/main/java'), field_type="MemoryCard",
                             expected_modifiers=['private', 'final']),
-
+        JMockSugarCheck(scope=('dir', 'src/test/java')),
         IdentifierRule(scope=('dir', 'src/test/java'),
                        node_filter=JavaFilter(node_class='method', node_annotations=['Test'], node_name=r"^test"))]
 
