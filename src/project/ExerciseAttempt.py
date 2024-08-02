@@ -146,7 +146,7 @@ class ExerciseAttempt:
             if result == SearchResult.FOUND:
                 structure_feedback.append(f'{structure.name}: {structure.description} - GOOD')
             elif result == SearchResult.CLOSE:
-                structure_feedback.append(f'{structure.name}: Close, that idea was that the {structure.description}')
+                structure_feedback.append(f'{structure.name}: Close, the idea was that the {structure.description}')
             else:
                 structure_feedback.append(f'{structure.name}: '
                                           f'This does not match the expected structure. The {structure.description}')
