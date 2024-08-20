@@ -93,8 +93,9 @@ def run_the_build(commit, commit_results, output, repo, repo_path):
     gradlew_path = os.path.join(repo_path, './gradlew')
 
     try:
-        result = subprocess.run([gradlew_path, 'test'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                text=True)
+        result = subprocess.run(
+            [gradlew_path, 'test'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
         if result.returncode == 0:
             print(f"Tests passed for commit {commit.hexsha}.")
             commit_results[commit.hexsha] = 'Passed'
