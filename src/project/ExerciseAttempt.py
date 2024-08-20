@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from git import Repo
 
@@ -55,7 +56,7 @@ def list_edited_files(repo_path) -> set[str]:
     return changed_files
 
 
-def commit_log(repo_path):
+def check_each_commit(repo_path):
     output = []
 
     try:
@@ -70,15 +71,43 @@ def commit_log(repo_path):
         # Get all commits, starting from the most recent one
         commits = list(repo.iter_commits(reverse=True))
 
+        commit_results = {}
+
         # Print the commit messages, skipping the initial commit
         output.append(f"You made {len(commits) - 1} commits:")
+
         for commit in commits[1:]:  # Skip the last commit, which is the initial one
-            output.append(f" - {commit.hexsha[:7]}: {commit.message.strip()}")
+            run_the_build(commit, commit_results, output, repo, repo_path)
 
     except Exception as e:
         print(f"An error occurred: {e}")
 
-    return "\n".join(output)
+    return output
+
+
+def run_the_build(commit, commit_results, output, repo, repo_path):
+
+    # Checkout the commit
+    repo.git.checkout(commit.hexsha)
+    # Run the tests using gradlew
+    gradlew_path = os.path.join(repo_path, './gradlew')
+
+    try:
+        result = subprocess.run([gradlew_path, 'test'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True)
+        if result.returncode == 0:
+            print(f"Tests passed for commit {commit.hexsha}.")
+            commit_results[commit.hexsha] = 'Passed'
+        else:
+            print(f"Tests failed for commit {commit.hexsha}.")
+            commit_results[commit.hexsha] = 'Failed'
+
+        print(f" - {commit.hexsha[:7]} - {commit_results[commit.hexsha]} : {commit.message.strip()}")
+        output.append(f" - {commit.hexsha[:7]} - {commit_results[commit.hexsha]} : {commit.message.strip()}")
+
+    except Exception as e:
+        print(f"An error occurred while testing commit {commit.hexsha}: {str(e)}")
+        commit_results[commit.hexsha] = f'Error: {str(e)}'
 
 
 class ExerciseAttempt:
@@ -161,7 +190,7 @@ class ExerciseAttempt:
 
     def build_pdf(self):
         create_feedback_pdf(self.edited_files, self.spec.task,
-                            commit_log(self.directory), "\n".join(self.structure_feedback), "SED")
+                            check_each_commit(self.directory), "\n".join(self.structure_feedback), "SED")
 
     def _feedback(self):
         return self.summary + "\n\n" + "\n".join(self.structure_feedback)

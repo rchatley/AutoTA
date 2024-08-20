@@ -41,7 +41,16 @@ class FeedbackPDF(FPDF):
         self.set_font('Courier', 'B', 16)
         self.cell(0, 10, 'Summary of Git Commits', 0, 1, 'C')
         self.set_font('Courier', '', 12)
-        self.multi_cell(0, 10, commit_log)
+
+        for commit in commit_log:
+            if "Passed : " in commit:
+                with self.highlight("Build Passed", modification_time=None, color=(0, 1, 0)):
+                    self.cell(0, self.line_height * 2, commit, border=0, ln=1)
+            elif "Failed : " in commit:
+                with self.highlight("Build Failed", modification_time=None, color=(1, 0, 0)):
+                    self.cell(0, self.line_height * 2, commit, border=0, ln=1)
+            else:
+                self.cell(0, self.line_height * 2, commit, border=0, ln=1)
 
     def add_code_with_feedback(self, file):
         self.file_name = file.file_name
