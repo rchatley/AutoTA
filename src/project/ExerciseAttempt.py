@@ -197,8 +197,7 @@ class ExerciseAttempt:
                           f"Then give a paragraph of feedback to the student "
                           f"in the style of a helpful university teaching assistant."
                           f"We won't show the students the points we're checking for, "
-                          f"just your feedback, so please make the feedback self contained. Be critical but constructive."
-                          f"Under no circumstances include any unicode characters in your response:\n\n")
+                          f"just your feedback, so please make the feedback self contained. Be critical but constructive.\n\n")
 
                 for i, marking_point in enumerate(feedback_points, 1):
                     ta_prompt += f"{i}. {marking_point}\n"
