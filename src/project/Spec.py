@@ -80,9 +80,26 @@ def camera_exercise_spec():
                       "Camera should implement the WriteListener interface as a callback mechanism"),
     ]
 
+    marking_points = {'CameraTest.java': [
+        "There should be basic tests checking that the sensor is turned on and off when the camera is powered on and off",
+        "If we are testing turning the camera off, we should power the camera on first",
+        "There should be tests checking that the camera can take a picture and store it on the memory card",
+        "Each of the tests should check a specific aspect of the camera's functionality",
+        "Each behaviour should be tested using mock objects - there shouldn't be any assertions on the state of the camera",
+        "There should be minimal duplication of code between tests."
+    ],
+    'Camera.java': [
+        "The Camera class should have a constructor that takes the Sensor and MemoryCard as arguments",
+        "The Camera class should have fields to track the power state of the camera",
+        "No internal state of the Camera class should be exposed to the outside world - notably the power state",
+        "The Camera class should not call the writeComplete() method itself, but should provide an implementation"
+        "writeComplete() should trigger a sensor power down if the camera has been powered off while writing",
+        "The overall implementation should be neat and concise, with minimal duplication of code",
+    ]}
+
     additional_files = {'src/main/java/ic/doc/camera/WriteListener.java'}
 
-    return Spec(task, overview, rules=rules, structures=structures, additional_files=additional_files)
+    return Spec(task, overview, rules=rules, structures=structures, marking_points=marking_points, additional_files=additional_files)
 
 
 # def build_spec(spec_file):
@@ -99,9 +116,10 @@ def camera_exercise_spec():
 
 
 class Spec:
-    def __init__(self, task, overview, rules=None, structures=None, additional_files=set()):
+    def __init__(self, task, overview, rules=None, structures=None, marking_points=None, additional_files=set()):
         self.task = task
         self.overview = overview
         self.rules = rules
         self.structures = structures
+        self.marking_points = marking_points
         self.additional_files = additional_files

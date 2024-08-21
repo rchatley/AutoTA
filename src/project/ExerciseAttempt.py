@@ -2,6 +2,8 @@ import os
 import subprocess
 
 from git import Repo
+from dotenv import load_dotenv
+from openai import OpenAI
 
 from src.entity_relations import JavaGraph
 from src.entity_relations.CodeStructure import SearchResult
@@ -133,6 +135,7 @@ class ExerciseAttempt:
         self.summary = ""
         self.rules_feedback = None
         self.structure_feedback = None
+        self.gpt_feedback = None
 
     def build_graph_of_code(self, scope_restriction) -> JavaGraph:
         if scope_restriction is None:
@@ -140,13 +143,16 @@ class ExerciseAttempt:
         else:
             return build_code_graph(self._files_within(scope_restriction))
 
-    def perform_analysis(self):
+    def perform_analysis(self, api_key):
         self.rules_feedback = []
         self.structure_feedback = []
+        self.gpt_feedback = []
         if self.spec.rules is not None:
             self.rules_feedback = self.apply_rules()
         if self.spec.structures is not None:
             self.structure_feedback = self.find_structures()
+        if self.spec.marking_points is not None:
+            self.gpt_feedback = self.ask_gpt(api_key)
 
     def apply_rules(self):
         complete_feedback = ["CODE STYLE RULES:"]
@@ -171,6 +177,35 @@ class ExerciseAttempt:
                 complete_feedback.extend(rule_feedback)
         complete_feedback.append("")
         return complete_feedback
+
+    def ask_gpt(self, api_key):
+        client = OpenAI(api_key=api_key)
+
+        for file in self.edited_files:
+            feedback_points = self.spec.marking_points.get(file.file_name)
+
+            if feedback_points is not None:
+
+                # Step 4: Combine the code and questions into a single prompt
+                ta_prompt = (f"Here is some Java code written by a student as a solution to an assignment:\n\n{file.contents}"
+                          f"\n\nPlease consider the code in relation to the following statements. "
+                          f"Then give a paragraph of feedback to the student "
+                          f"in the style of a helpful university teaching assistant."
+                          f"We won't show the students the points we're checking for, "
+                          f"just your feedback, so please make the feedback self contained. Be critical but constructive."
+                          f"Under no circumstances include any unicode characters in your response:\n\n")
+
+                for i, marking_point in enumerate(feedback_points, 1):
+                    ta_prompt += f"{i}. {marking_point}\n"
+
+                response = client.chat.completions.create(model="gpt-4o",
+                                                          messages=[
+                                                              {"role": "system",
+                                                               "content": "You are an expert Java programmer acting as a teaching assistant for a university course on software design. Your character is to be critical but fair."},
+                                                              {"role": "user", "content": ta_prompt}
+                                                          ])
+
+                file.gpt_feedback = response.choices[0].message.content
 
     def find_structures(self):
         structure_feedback = []
@@ -204,3 +239,5 @@ class ExerciseAttempt:
         scoped_files = [file for file in self.all_files if
                         os.path.commonpath([os.path.normpath(file.relative_path), scope_dir]) == scope_dir]
         return scoped_files
+
+

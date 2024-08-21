@@ -1,10 +1,18 @@
+import os
 import sys
 
 from src.project.ExerciseAttempt import ExerciseAttempt
 from src.project.Spec import example_template_method_spec, camera_exercise_spec
 
+from dotenv import load_dotenv
+
 if __name__ == "__main__":
-    repo_dir, api_key = None, None
+
+    load_dotenv()
+
+    api_key = os.getenv('OPENAI_API_KEY')
+    repo_dir = None
+
     if len(sys.argv) == 1:
         # Internal Testing
         repo_dir = 'test/example_task/'
@@ -24,9 +32,6 @@ if __name__ == "__main__":
 
     # attempt.print_er_graph()
 
-    attempt.perform_analysis()
-
-    if api_key is not None:
-        attempt.get_llm_summary(api_key)
+    attempt.perform_analysis(api_key)
 
     attempt.build_pdf()

@@ -15,6 +15,7 @@ class JavaFile:
         self.relative_path = os.path.relpath(file_path, root)
         self.contents = contents
         self.feedback = []
+        self.gpt_feedback = None
         self.ast = self._parse_file()
 
     def _parse_file(self):
