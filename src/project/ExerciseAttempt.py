@@ -95,16 +95,21 @@ def run_the_build(commit, repo, repo_path):
 
     try:
         result = subprocess.run(
-            [gradlew_path, 'test'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            [gradlew_path, 'check'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         if result.returncode == 0:
-            print(f"Tests passed for commit {commit.hexsha}.")
+            print(f"Build passed for commit {commit.hexsha}.")
             return {'hash': commit.hexsha[:7], 'result': 'Passed',
                     'message': commit.message.strip(), 'log': result.stdout.strip()}
         else:
-            print(f"Tests failed for commit {commit.hexsha}.")
-            return {'hash': commit.hexsha[:7], 'result': 'Failed',
-                    'message': commit.message.strip(), 'log': result.stderr.strip()}
+            if "Execution failed for task ':jacocoTestCoverageVerification'" in result.stderr:
+                print(f"Coverage check failed for commit {commit.hexsha}.")
+                return {'hash': commit.hexsha[:7], 'result': 'Coverage',
+                        'message': commit.message.strip(), 'log': result.stderr.strip()}
+            else:
+                print(f"Build failed for commit {commit.hexsha}.")
+                return {'hash': commit.hexsha[:7], 'result': 'Failed',
+                        'message': commit.message.strip(), 'log': result.stderr.strip()}
 
         print(f" - {commit.hexsha[:7]} - {build_results[commit.hexsha]} : {commit.message.strip()}")
         return {'hash': commit.hexsha[:7], 'result': '',

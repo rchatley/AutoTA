@@ -53,6 +53,9 @@ class FeedbackPDF(FPDF):
             if commit['result'] == "Passed":
                 with self.highlight(commit['log'], modification_time=None, color=(0, 1, 0)):
                     self.cell(0, self.line_height * 2, display, border=0, ln=1)
+            elif commit['result'] == "Coverage":
+                with self.highlight(commit['log'], modification_time=None, color=(1, 0.5, 0)):
+                    self.cell(0, self.line_height * 2, display, border=0, ln=1)
             elif commit['result'] == "Failed":
                 with self.highlight(commit['log'], modification_time=None, color=(1, 0, 0)):
                     self.cell(0, self.line_height * 2, display, border=0, ln=1)
