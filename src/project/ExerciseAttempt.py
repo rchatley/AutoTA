@@ -57,7 +57,9 @@ def list_edited_files(repo_path) -> set[str]:
 
 
 def check_each_commit(repo_path):
-    output = []
+
+    summary = ""
+    build_results = []
 
     try:
         # Open the repository
@@ -65,28 +67,25 @@ def check_each_commit(repo_path):
 
         # Ensure the repository is valid
         if repo.bare:
-            output.append("The repository is bare, cannot process.")
-            return
+            summary = "The repository is bare, cannot process."
+        else:
 
-        # Get all commits, starting from the most recent one
-        commits = list(repo.iter_commits(reverse=True))
+            # Get all commits, starting from the most recent one
+            commits = list(repo.iter_commits(reverse=True))
 
-        commit_results = {}
+            # Print the commit messages, skipping the initial commit
+            summary = f"You made {len(commits) - 1} commits:"
 
-        # Print the commit messages, skipping the initial commit
-        output.append(f"You made {len(commits) - 1} commits:")
-
-        for commit in commits[1:]:  # Skip the last commit, which is the initial one
-            run_the_build(commit, commit_results, output, repo, repo_path)
+            for commit in commits[1:]:  # Skip the last commit, which is the initial one
+                build_results.append(run_the_build(commit, repo, repo_path))
 
     except Exception as e:
         print(f"An error occurred: {e}")
 
-    return output
+    return summary, build_results
 
 
-def run_the_build(commit, commit_results, output, repo, repo_path):
-
+def run_the_build(commit, repo, repo_path):
     # Checkout the commit
     repo.git.checkout(commit.hexsha)
     # Run the tests using gradlew
@@ -98,17 +97,21 @@ def run_the_build(commit, commit_results, output, repo, repo_path):
 
         if result.returncode == 0:
             print(f"Tests passed for commit {commit.hexsha}.")
-            commit_results[commit.hexsha] = 'Passed'
+            return {'hash': commit.hexsha[:7], 'result': 'Passed',
+                    'message': commit.message.strip(), 'log': result.stdout.strip()}
         else:
             print(f"Tests failed for commit {commit.hexsha}.")
-            commit_results[commit.hexsha] = 'Failed'
+            return {'hash': commit.hexsha[:7], 'result': 'Failed',
+                    'message': commit.message.strip(), 'log': result.stderr.strip()}
 
-        print(f" - {commit.hexsha[:7]} - {commit_results[commit.hexsha]} : {commit.message.strip()}")
-        output.append(f" - {commit.hexsha[:7]} - {commit_results[commit.hexsha]} : {commit.message.strip()}")
+        print(f" - {commit.hexsha[:7]} - {build_results[commit.hexsha]} : {commit.message.strip()}")
+        return {'hash': commit.hexsha[:7], 'result': '',
+                'message': commit.message.strip(), 'log': result.stdout.strip()}
 
     except Exception as e:
         print(f"An error occurred while testing commit {commit.hexsha}: {str(e)}")
-        commit_results[commit.hexsha] = f'Error: {str(e)}'
+        return {'commit': commit.hexsha[:7], 'result': 'Error',
+                'message': commit.message.strip(), 'log': result.stdout.strip()}
 
 
 class ExerciseAttempt:

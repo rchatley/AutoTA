@@ -9,7 +9,7 @@ class FeedbackPDF(FPDF):
                  unit='mm', size='A4'):
         super().__init__(orientation, unit, size)
         self.file_name = ""
-        self.add_cover_page(task, 'AutoTA', summary)
+        self.add_cover_page(task, 'abc23', summary)
         self.set_font('Courier', '', 8)
         self.line_height = self.font_size * 1.25
         self.set_auto_page_break(auto=True, margin=15)
@@ -36,19 +36,25 @@ class FeedbackPDF(FPDF):
             self.ln(20)
             self.multi_cell(0, 10, summary, 0, 'C')
 
-    def add_commit_summary(self, commit_log):
+    def add_commit_summary(self, revision_history):
+
+        (summary, build_results) = revision_history
+
         self.add_page()
         self.set_font('Courier', 'B', 16)
         self.cell(0, 10, 'Summary of Git Commits', 0, 1, 'C')
         self.set_font('Courier', '', 12)
 
-        for commit in commit_log:
-            if "Passed : " in commit:
-                with self.highlight("Build Passed", modification_time=None, color=(0, 1, 0)):
-                    self.cell(0, self.line_height * 2, commit, border=0, ln=1)
-            elif "Failed : " in commit:
-                with self.highlight("Build Failed", modification_time=None, color=(1, 0, 0)):
-                    self.cell(0, self.line_height * 2, commit, border=0, ln=1)
+        self.cell(0, self.line_height * 2, summary, border=0, ln=1)
+
+        for commit in build_results:
+            display = commit['hash'] + " - " + commit['message']
+            if commit['result'] == "Passed":
+                with self.highlight(commit['log'], modification_time=None, color=(0, 1, 0)):
+                    self.cell(0, self.line_height * 2, display , border=0, ln=1)
+            elif commit['result'] == "Failed":
+                with self.highlight(commit['log'], modification_time=None, color=(1, 0, 0)):
+                    self.cell(0, self.line_height * 2, display, border=0, ln=1)
             else:
                 self.cell(0, self.line_height * 2, commit, border=0, ln=1)
 
