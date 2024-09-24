@@ -1,7 +1,10 @@
 import os
 from datetime import datetime
+from typing import List
 
 from fpdf import FPDF
+
+from src.project.BuildResult import BuildResult
 
 
 class FeedbackPDF(FPDF):
@@ -37,8 +40,9 @@ class FeedbackPDF(FPDF):
             self.ln(20)
             self.multi_cell(0, 10, summary, 0, 'C')
 
-    def add_commit_summary(self, revision_history):
+    def add_commit_summary(self, revision_history: tuple[str, list[BuildResult]]):
 
+        build_results: list[BuildResult]
         (summary, build_results) = revision_history
 
         self.add_page()
@@ -48,19 +52,17 @@ class FeedbackPDF(FPDF):
 
         self.cell(0, self.line_height * 2, summary, border=0, ln=1)
 
-        for commit in build_results:
-            display = commit['hash'] + " - " + commit['message']
-            if commit['result'] == "Passed":
-                with self.highlight(commit['log'], modification_time=None, color=(0, 1, 0)):
-                    self.cell(0, self.line_height * 2, display, border=0, ln=1)
-            elif commit['result'] == "Coverage":
-                with self.highlight(commit['log'], modification_time=None, color=(1, 0.5, 0)):
-                    self.cell(0, self.line_height * 2, display, border=0, ln=1)
-            elif commit['result'] == "Failed":
-                with self.highlight(commit['log'], modification_time=None, color=(1, 0, 0)):
-                    self.cell(0, self.line_height * 2, display, border=0, ln=1)
-            else:
-                self.cell(0, self.line_height * 2, commit, border=0, ln=1)
+        result_colors = {
+            BuildResult.Result.PASSED: (0, 1, 0),
+            BuildResult.Result.COVERAGE: (1, 0.5, 0),
+            BuildResult.Result.FAILED: (1, 0, 0)
+        }
+
+        for run in build_results:
+            display = run.commit + " - " + run.message
+            line_color = result_colors.get(run.result, (1, 1, 1))
+            with self.highlight(run.log, modification_time=None, color=line_color):
+                self.cell(0, self.line_height * 2, display, border=0, ln=1)
 
     def add_code_with_feedback(self, file):
         self.file_name = file.file_name
@@ -96,5 +98,3 @@ class FeedbackPDF(FPDF):
         self.set_xy(x_position, y_position)
         self.set_text_color(255, 0, 0)
         self.multi_cell(cell_width, self.line_height, file.gpt_feedback)
-
-

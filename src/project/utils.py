@@ -1,5 +1,6 @@
 from openai import OpenAI
 
+from src.project.BuildResult import BuildResult
 from src.project.FeedbackPDF import FeedbackPDF
 
 
@@ -42,7 +43,7 @@ def gpt_api_request(project_files, project_feedback, api_key=None,
         return None
 
 
-def create_feedback_pdf(code_files, task, revision_history, summary, name):
+def create_feedback_pdf(code_files, task, revision_history: tuple[str, list[BuildResult]], summary, name):
     feedback_pdf = FeedbackPDF(task=task, summary=summary)
     feedback_pdf.add_commit_summary(revision_history)
     for file in code_files:

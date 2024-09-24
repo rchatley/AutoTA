@@ -2,12 +2,12 @@ import os
 import subprocess
 
 from git import Repo
-from dotenv import load_dotenv
 from openai import OpenAI
 
 from src.entity_relations import JavaGraph
 from src.entity_relations.CodeStructure import SearchResult
 from src.entity_relations.JavaGraph import build_code_graph, print_graph
+from src.project.BuildResult import BuildResult
 from src.project.JavaFile import JavaFile
 from src.project.Spec import Spec
 from src.project.utils import create_feedback_pdf, gpt_api_request
@@ -58,10 +58,9 @@ def list_edited_files(repo_path) -> set[str]:
     return changed_files
 
 
-def check_each_commit(repo_path):
-
-    summary = ""
-    build_results = []
+def check_each_commit(repo_path) -> tuple[str, list[BuildResult]]:
+    summary: str = ""
+    build_results: list[BuildResult] = []
 
     try:
         # Open the repository
@@ -87,7 +86,7 @@ def check_each_commit(repo_path):
     return summary, build_results
 
 
-def run_the_build(commit, repo, repo_path):
+def run_the_build(commit, repo, repo_path) -> BuildResult:
     # Checkout the commit
     repo.git.checkout(commit.hexsha)
     # Run the tests using gradlew
@@ -97,28 +96,22 @@ def run_the_build(commit, repo, repo_path):
         result = subprocess.run(
             [gradlew_path, 'check'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
+        stdout_log = result.stdout.strip()
+
         if result.returncode == 0:
             print(f"Build passed for commit {commit.hexsha}.")
-            return {'hash': commit.hexsha[:7], 'result': 'Passed',
-                    'message': commit.message.strip(), 'log': result.stdout.strip()}
+            return BuildResult(BuildResult.Result.PASSED, commit, stdout_log)
         else:
             if "Execution failed for task ':jacocoTestCoverageVerification'" in result.stderr:
                 print(f"Coverage check failed for commit {commit.hexsha}.")
-                return {'hash': commit.hexsha[:7], 'result': 'Coverage',
-                        'message': commit.message.strip(), 'log': result.stderr.strip()}
+                return BuildResult(BuildResult.Result.COVERAGE, commit, stdout_log)
             else:
                 print(f"Build failed for commit {commit.hexsha}.")
-                return {'hash': commit.hexsha[:7], 'result': 'Failed',
-                        'message': commit.message.strip(), 'log': result.stderr.strip()}
-
-        print(f" - {commit.hexsha[:7]} - {build_results[commit.hexsha]} : {commit.message.strip()}")
-        return {'hash': commit.hexsha[:7], 'result': '',
-                'message': commit.message.strip(), 'log': result.stdout.strip()}
+                return BuildResult(BuildResult.Result.FAILED, commit, stdout_log)
 
     except Exception as e:
         print(f"An error occurred while testing commit {commit.hexsha}: {str(e)}")
-        return {'commit': commit.hexsha[:7], 'result': 'Error',
-                'message': commit.message.strip(), 'log': result.stdout.strip()}
+        return BuildResult(BuildResult.Result.ERROR, commit, stdout_log)
 
 
 class ExerciseAttempt:
@@ -177,7 +170,8 @@ class ExerciseAttempt:
                         f'All classes within {rule.scope} were properly encapsulated')
                 elif isinstance(rule, IdentifierRule):
                     complete_feedback.append(
-                        f'All {rule.node_filter.node_class}s within {rule.scope} had the correct identifier format of {rule.node_filter.node_name}')
+                        f'All {rule.node_filter.node_class}s within {rule.scope} had the correct identifier '
+                        f'format of {rule.node_filter.node_name}')
             else:
                 complete_feedback.extend(rule_feedback)
         complete_feedback.append("")
@@ -192,12 +186,13 @@ class ExerciseAttempt:
             if feedback_points is not None:
 
                 # Step 4: Combine the code and questions into a single prompt
-                ta_prompt = (f"Here is some Java code written by a student as a solution to an assignment:\n\n{file.contents}"
-                          f"\n\nPlease consider the code in relation to the following statements. "
-                          f"Then give a paragraph of feedback to the student "
-                          f"in the style of a helpful university teaching assistant."
-                          f"We won't show the students the points we're checking for, "
-                          f"just your feedback, so please make the feedback self contained. Be critical but constructive.\n\n")
+                ta_prompt = (
+                    f"Here is some Java code written by a student as a solution to an assignment:\n\n{file.contents}"
+                    f"\n\nPlease consider the code in relation to the following statements. "
+                    f"Then give a paragraph of feedback to the student "
+                    f"in the style of a helpful university teaching assistant."
+                    f"We won't show the students the points we're checking for, "
+                    f"just your feedback, so please make the feedback self contained. Be critical but constructive.\n\n")
 
                 for i, marking_point in enumerate(feedback_points, 1):
                     ta_prompt += f"{i}. {marking_point}\n"
@@ -232,8 +227,9 @@ class ExerciseAttempt:
         self.summary = gpt_api_request(self.edited_files, self.structure_feedback, api_key)
 
     def build_pdf(self):
+        commit_history_analysis: tuple[str, list[BuildResult]] = check_each_commit(self.directory)
         create_feedback_pdf(self.edited_files, self.spec.task,
-                            check_each_commit(self.directory), "\n".join(self.structure_feedback), "SED")
+                            commit_history_analysis, "\n".join(self.structure_feedback), "SED")
 
     def _feedback(self):
         return self.summary + "\n\n" + "\n".join(self.structure_feedback)
@@ -243,5 +239,3 @@ class ExerciseAttempt:
         scoped_files = [file for file in self.all_files if
                         os.path.commonpath([os.path.normpath(file.relative_path), scope_dir]) == scope_dir]
         return scoped_files
-
-
