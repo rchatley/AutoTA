@@ -5,6 +5,7 @@ from typing import List
 from fpdf import FPDF
 
 from src.project.BuildResult import BuildResult
+from src.project.BuildResults import BuildResults
 
 
 class FeedbackPDF(FPDF):
@@ -40,28 +41,26 @@ class FeedbackPDF(FPDF):
             self.ln(20)
             self.multi_cell(0, 10, summary, 0, 'C')
 
-    def add_commit_summary(self, revision_history: tuple[str, list[BuildResult]]):
-
-        build_results: list[BuildResult]
-        (summary, build_results) = revision_history
+    def add_commit_summary(self, build_results: BuildResults):
 
         self.add_page()
         self.set_font('Courier', 'B', 16)
         self.cell(0, 10, 'Summary of Git Commits', 0, 1, 'C')
         self.set_font('Courier', '', 12)
 
-        self.cell(0, self.line_height * 2, summary, border=0, ln=1)
+        self.cell(0, self.line_height * 2, build_results.summary, border=0, ln=1)
 
         result_colors = {
-            BuildResult.Result.PASSED: (0, 1, 0),
-            BuildResult.Result.COVERAGE: (1, 0.5, 0),
-            BuildResult.Result.FAILED: (1, 0, 0)
+            BuildResult.Status.PASSED: (0, 1, 0),
+            BuildResult.Status.COVERAGE: (1, 0.5, 0),
+            BuildResult.Status.STYLE: (1, 1, 0),
+            BuildResult.Status.FAILED: (1, 0, 0)
         }
 
-        for run in build_results:
-            display = run.commit + " - " + run.message
-            line_color = result_colors.get(run.result, (1, 1, 1))
-            with self.highlight(run.log, modification_time=None, color=line_color):
+        for build in build_results.builds:
+            display = build.commit + " - " + build.message
+            line_color = result_colors.get(build.status, (1, 1, 1))
+            with self.highlight(build.log, modification_time=None, color=line_color):
                 self.cell(0, self.line_height * 2, display, border=0, ln=1)
 
     def add_code_with_feedback(self, file):
@@ -98,3 +97,38 @@ class FeedbackPDF(FPDF):
         self.set_xy(x_position, y_position)
         self.set_text_color(255, 0, 0)
         self.multi_cell(cell_width, self.line_height, file.gpt_feedback)
+
+    def comment_on(self, build_results: BuildResults):
+
+        comments: list(str) = []
+
+        if build_results.not_many_commits():
+            comments.append("You have not made many commits. Try to commit more frequently, breaking down your work.")
+            if build_results.all_passed():
+                comments.append("Good that the commits you have made are passing though.")
+        elif build_results.all_passed():
+            comments.append("Incremental work and all builds passed. Good job!")
+        elif build_results.final_build().passed():
+            comments.append("Your final build passed. Good job!")
+
+        if build_results.mostly_failed():
+            comments.append("Most of your builds have failed. Try to only commit when the build is passing.")
+        elif build_results.any_failed():
+            comments.append("Some builds have failed. Try to only commit when the build is passing.")
+
+        if build_results.show_style_errors():
+            comments.append("Some builds have style errors. Try to fix these before committing.")
+            comments.append("You can format your code automatically in your IDE.")
+
+        if build_results.show_low_coverage():
+            comments.append("Some builds have low test coverage. ")
+            comments.append("If you follow TDD then every build should naturally have good coverage.")
+
+        page_width = self.w
+        cell_width = page_width - 20
+        self.multi_cell(cell_width, self.line_height * 1.5, "\n" + "\n".join(comments))
+
+    def add_any_other_comments(self, comments):
+        page_width = self.w
+        cell_width = page_width - 20
+        self.multi_cell(cell_width, self.line_height * 1.5, "\n" + "\n".join(comments))

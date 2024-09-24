@@ -23,8 +23,8 @@ class JavaFile:
             with open(os.path.join(self.root, self.file_path), 'r') as file:
                 self.contents = file.read()
 
-        tokens = list(java_ast.tokenizer.tokenize(self.contents))
-        return java_ast.parser.Parser(tokens).parse()
+                tokens = list(java_ast.tokenizer.tokenize(self.contents))
+                return java_ast.parser.Parser(tokens).parse()
 
     def full_file_path(self) -> str:
         return os.path.join(self.relative_path, self.file_name)

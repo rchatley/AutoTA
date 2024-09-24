@@ -1,10 +1,10 @@
 import os
 import sys
 
-from src.project.ExerciseAttempt import ExerciseAttempt
-from src.project.Spec import example_template_method_spec, camera_exercise_spec
-
 from dotenv import load_dotenv
+
+from src.project.Submission import Submission
+from src.project.Spec import camera_exercise_spec
 
 if __name__ == "__main__":
 
@@ -13,25 +13,20 @@ if __name__ == "__main__":
     api_key = os.getenv('OPENAI_API_KEY')
     repo_dir = None
 
-    if len(sys.argv) == 1:
-        # Internal Testing
-        repo_dir = 'test/example_task/'
-    elif len(sys.argv) == 2:
-        print("Source directory " + sys.argv[1])
+    if len(sys.argv) == 2:
+        print("Processing directory: " + sys.argv[1])
         repo_dir = sys.argv[1]
-    elif len(sys.argv) == 3:
-        repo_dir = sys.argv[1]
-        api_key = sys.argv[2]
     else:
-        print("Usage: python autoReview.py [source_directory] [api_key]")
+        print("Usage: python autoReview.py [source_directory]")
         sys.exit(1)
 
     spec = camera_exercise_spec()
 
-    attempt = ExerciseAttempt(repo_dir, spec)
+    submission = Submission(repo_dir, spec)
 
-    # attempt.print_er_graph()
+    submission.build_each_commit()
+    submission.ask_gpt_about_the_commit_messages(api_key)
 
-    attempt.perform_analysis(api_key)
+    submission.perform_analysis(api_key)
 
-    attempt.build_pdf()
+    submission.build_pdf()

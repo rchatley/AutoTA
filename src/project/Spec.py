@@ -97,7 +97,7 @@ def camera_exercise_spec():
         "The overall implementation should be neat and concise, with minimal duplication of code",
     ]}
 
-    additional_files = {'src/main/java/ic/doc/camera/WriteListener.java'}
+    additional_files = {} #'src/main/java/ic/doc/camera/WriteListener.java'}
 
     return Spec(task, overview, rules=rules, structures=structures, marking_points=marking_points, additional_files=additional_files)
 

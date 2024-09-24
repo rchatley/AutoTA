@@ -8,6 +8,7 @@ from src.entity_relations import JavaGraph
 from src.entity_relations.CodeStructure import SearchResult
 from src.entity_relations.JavaGraph import build_code_graph, print_graph
 from src.project.BuildResult import BuildResult
+from src.project.BuildResults import BuildResults
 from src.project.JavaFile import JavaFile
 from src.project.Spec import Spec
 from src.project.utils import create_feedback_pdf, gpt_api_request
@@ -55,10 +56,13 @@ def list_edited_files(repo_path) -> set[str]:
     untracked_files = repo.untracked_files
     changed_files.update(untracked_files)
 
+    # Remove files that are not present on the disk
+    changed_files = {file for file in changed_files if os.path.exists(os.path.join(repo_path, file))}
+
     return changed_files
 
 
-def check_each_commit(repo_path) -> tuple[str, list[BuildResult]]:
+def run_gradle_build_for_each_commit(repo_path: str) -> BuildResults:
     summary: str = ""
     build_results: list[BuildResult] = []
 
@@ -77,48 +81,70 @@ def check_each_commit(repo_path) -> tuple[str, list[BuildResult]]:
             # Print the commit messages, skipping the initial commit
             summary = f"You made {len(commits) - 1} commits:"
 
-            for commit in commits[1:]:  # Skip the last commit, which is the initial one
+            for commit in commits[1:]:  # Skip the initial commit
                 build_results.append(run_the_build(commit, repo, repo_path))
 
     except Exception as e:
         print(f"An error occurred: {e}")
 
-    return summary, build_results
+    return BuildResults(summary, build_results)
 
 
 def run_the_build(commit, repo, repo_path) -> BuildResult:
     # Checkout the commit
-    repo.git.checkout(commit.hexsha)
+    repo.git.reset(commit.hexsha, hard=True)
     # Run the tests using gradlew
     gradlew_path = os.path.join(repo_path, './gradlew')
 
     try:
-        result = subprocess.run(
-            [gradlew_path, 'check'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        result, stdout_log = run_gradle("clean", gradlew_path, repo_path)
 
-        stdout_log = result.stdout.strip()
+        if result.returncode != 0:
+            print(f"An error occurred while cleaning the project: {result.stderr}")
+            return BuildResult(BuildResult.Status.ERROR, commit, result.stderr.strip())
+
+        result, stdout_log = run_gradle("test", gradlew_path, repo_path)
 
         if result.returncode == 0:
-            print(f"Build passed for commit {commit.hexsha}.")
-            return BuildResult(BuildResult.Result.PASSED, commit, stdout_log)
+            print(f"Tests passed for commit {commit.hexsha}.")
         else:
-            if "Execution failed for task ':jacocoTestCoverageVerification'" in result.stderr:
-                print(f"Coverage check failed for commit {commit.hexsha}.")
-                return BuildResult(BuildResult.Result.COVERAGE, commit, stdout_log)
-            else:
-                print(f"Build failed for commit {commit.hexsha}.")
-                return BuildResult(BuildResult.Result.FAILED, commit, stdout_log)
+            print(f"Tests failed for commit {commit.hexsha}.")
+            return BuildResult(BuildResult.Status.FAILED, commit, result.stderr.strip())
+
+        result, stdout_log = run_gradle("check", gradlew_path, repo_path)
+
+        if "Execution failed for task ':jacocoTestCoverageVerification'" in result.stderr:
+            print(f"Coverage check failed for commit {commit.hexsha}.")
+            return BuildResult(BuildResult.Status.COVERAGE, commit, stdout_log)
+        elif "Execution failed for task ':checkstyleTest'" in result.stderr:
+            print(f"Code style check failed for commit {commit.hexsha}.")
+            return BuildResult(BuildResult.Status.STYLE, commit, stdout_log)
+        else:
+            print(f"Build passed for commit {commit.hexsha}.")
+            return BuildResult(BuildResult.Status.PASSED, commit, stdout_log)
 
     except Exception as e:
         print(f"An error occurred while testing commit {commit.hexsha}: {str(e)}")
-        return BuildResult(BuildResult.Result.ERROR, commit, stdout_log)
+        return BuildResult(BuildResult.Status.ERROR, commit, stdout_log)
 
 
-class ExerciseAttempt:
+def run_gradle(task, gradlew_path, repo_path):
+    result = subprocess.run(
+        [gradlew_path, task], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    stdout_log = result.stdout.strip()
+    return result, stdout_log
+
+
+def failed(result):
+    return result.status == BuildResult.Status.FAILED
+
+
+class Submission:
     spec: Spec
     edited_files: list[JavaFile]
     additional_types: list[JavaFile]
     er_graph: JavaGraph
+    comments: list[str]
 
     def __init__(self, directory, spec: Spec, scope_restriction: str = None):
 
@@ -131,9 +157,11 @@ class ExerciseAttempt:
         self.er_graph = self.build_graph_of_code(scope_restriction)
 
         self.summary = ""
+        self.build_results: BuildResults = None
         self.rules_feedback = None
         self.structure_feedback = None
         self.gpt_feedback = None
+        self.comments = []
 
     def build_graph_of_code(self, scope_restriction) -> JavaGraph:
         if scope_restriction is None:
@@ -147,10 +175,10 @@ class ExerciseAttempt:
         self.gpt_feedback = []
         if self.spec.rules is not None:
             self.rules_feedback = self.apply_rules()
-        if self.spec.structures is not None:
-            self.structure_feedback = self.find_structures()
-        if self.spec.marking_points is not None:
-            self.gpt_feedback = self.ask_gpt(api_key)
+        # if self.spec.structures is not None:
+        #     self.structure_feedback = self.find_structures()
+        # if self.spec.marking_points is not None:
+        #     self.gpt_feedback = self.ask_gpt(api_key)
 
     def apply_rules(self):
         complete_feedback = ["CODE STYLE RULES:"]
@@ -227,9 +255,8 @@ class ExerciseAttempt:
         self.summary = gpt_api_request(self.edited_files, self.structure_feedback, api_key)
 
     def build_pdf(self):
-        commit_history_analysis: tuple[str, list[BuildResult]] = check_each_commit(self.directory)
         create_feedback_pdf(self.edited_files, self.spec.task,
-                            commit_history_analysis, "\n".join(self.structure_feedback), "SED")
+                            self.build_results, comments=self.comments, name="SED")
 
     def _feedback(self):
         return self.summary + "\n\n" + "\n".join(self.structure_feedback)
@@ -239,3 +266,26 @@ class ExerciseAttempt:
         scoped_files = [file for file in self.all_files if
                         os.path.commonpath([os.path.normpath(file.relative_path), scope_dir]) == scope_dir]
         return scoped_files
+
+    def build_each_commit(self):
+        self.build_results = run_gradle_build_for_each_commit(self.directory)
+
+    def ask_gpt_about_the_commit_messages(self, api_key):
+        client = OpenAI(api_key=api_key)
+
+        prompt = (
+            f"Here are some commit messages written by a student. "
+            f"Can you give me a pithy one-sentence opinion on the quality of these commit messages?.\n\n")
+
+        prompt += ("\n".join(self.build_results.commit_messages()))
+
+        response = client.chat.completions.create(model="gpt-4o",
+                                                  messages=[
+                                                      {"role": "system",
+                                                       "content": "You are an expert Java programmer acting as a teaching assistant for a university course on software design. Your character is to be critical but fair."},
+                                                      {"role": "user", "content": prompt}
+                                                  ])
+
+        opinion = response.choices[0].message.content
+
+        self.comments.append(opinion)
