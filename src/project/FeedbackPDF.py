@@ -98,7 +98,7 @@ class FeedbackPDF(FPDF):
         self.set_text_color(255, 0, 0)
         self.multi_cell(cell_width, self.line_height, file.gpt_feedback)
 
-    def comment_on(self, build_results: BuildResults):
+    def comment_on(self, build_results: BuildResults, other_comments: List[str] = None):
 
         comments: list(str) = []
 
@@ -126,9 +126,4 @@ class FeedbackPDF(FPDF):
 
         page_width = self.w
         cell_width = page_width - 20
-        self.multi_cell(cell_width, self.line_height * 1.5, "\n" + "\n".join(comments))
-
-    def add_any_other_comments(self, comments):
-        page_width = self.w
-        cell_width = page_width - 20
-        self.multi_cell(cell_width, self.line_height * 1.5, "\n" + "\n".join(comments))
+        self.multi_cell(cell_width, self.line_height * 1.5, "\n" + "\n".join(comments + other_comments))

@@ -256,7 +256,7 @@ class Submission:
 
     def build_pdf(self):
         create_feedback_pdf(self.edited_files, self.spec.task,
-                            self.build_results, comments=self.comments, name="SED")
+                            self.build_results, commit_msg_opinion=self.comments, name="SED")
 
     def _feedback(self):
         return self.summary + "\n\n" + "\n".join(self.structure_feedback)
@@ -275,7 +275,7 @@ class Submission:
 
         prompt = (
             f"Here are some commit messages written by a student. "
-            f"Can you give me a pithy one-sentence opinion on the quality of these commit messages?.\n\n")
+            f"Can you give me a one-sentence opinion on the quality of these commit messages?.\n\n")
 
         prompt += ("\n".join(self.build_results.commit_messages()))
 
@@ -287,5 +287,7 @@ class Submission:
                                                   ])
 
         opinion = response.choices[0].message.content
+
+        print(f"Opinion on commit messages: {opinion}")
 
         self.comments.append(opinion)

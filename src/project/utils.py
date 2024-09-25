@@ -44,12 +44,11 @@ def gpt_api_request(project_files, project_feedback, api_key=None,
         return None
 
 
-def create_feedback_pdf(code_files, task, build_results: BuildResults, comments: list[str], summary="", name=""):
+def create_feedback_pdf(code_files, task, build_results: BuildResults, commit_msg_opinion: list[str], summary="", name=""):
     feedback_pdf = FeedbackPDF(task=task, summary=summary)
     feedback_pdf.add_commit_summary(build_results)
 
-    feedback_pdf.comment_on(build_results)
-    feedback_pdf.add_any_other_comments(comments)
+    feedback_pdf.comment_on(build_results, commit_msg_opinion)
 
     for file in code_files:
         feedback_pdf.add_code_with_feedback(file)
