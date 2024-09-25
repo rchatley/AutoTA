@@ -3,9 +3,12 @@ from src.entity_relations.DesignPattern import pattern_library
 from src.entity_relations.ERClasses import Class, Constructor, Field, Interface
 from src.filters.JavaFilter import JavaFilter
 from src.rules.AccessModifierCheck import AccessModifierCheck
+from src.rules.ClassExtendingSuperclassCheck import ClassExtendingSuperclassCheck
+from src.rules.ClassImplementingInterfaceCheck import ClassImplementingInterfaceCheck
 from src.rules.EncapsulationRule import EncapsulationRule
 from src.rules.IdentifierRule import IdentifierRule
 from src.rules.JMockSugarCheck import JMockSugarCheck
+from src.rules.MethodWithReturnTypeCheck import MethodWithReturnTypeCheck
 
 
 def example_template_method_spec():
@@ -31,7 +34,12 @@ def camera_exercise_spec():
                             expected_modifiers=['private', 'final']),
         AccessModifierCheck(scope=('dir', 'src/main/java'), field_type="MemoryCard",
                             expected_modifiers=['private', 'final']),
+        AccessModifierCheck(scope=('dir', 'src/main/java'), field_type="List",
+                            expected_modifiers=['private', 'final']),
         JMockSugarCheck(scope=('dir', 'src/test/java')),
+        MethodWithReturnTypeCheck(scope=('dir', 'src/main/java'), return_type="List"),
+        ClassImplementingInterfaceCheck(scope=('dir', 'src/main/java'), interface_type="List"),
+        ClassExtendingSuperclassCheck(scope=('dir', 'src/main/java'), superclass_type="ArrayList"),
         IdentifierRule(scope=('dir', 'src/test/java'),
                        node_filter=JavaFilter(node_class='method', node_annotations=['Test'], node_name=r"^test"))]
 
