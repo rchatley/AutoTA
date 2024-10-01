@@ -4,8 +4,9 @@ from src.rules.Rule import Rule
 
 # Checks that all nodes within scope follow naming convention
 class IdentifierRule(Rule):
-    def __init__(self, scope='project', node_filter=None):
+    def __init__(self, scope='project', node_filter=None, feedback_msg=None):
         super().__init__(scope)
+        self.feedback_msg = feedback_msg
         self.node_filter = node_filter
 
     def apply(self, file):
@@ -18,9 +19,13 @@ class IdentifierRule(Rule):
             line, char = node.position
             name = get_node_name(node)
 
-            feedback.append(
-                (line, f'The {self.node_filter.node_class}, '
-                       f'{name}, does not follow the specified naming convention.'))
+            if self.feedback_msg is not None:
+                feedback.append(
+                    (line, self.feedback_msg))
+            else:
+                feedback.append(
+                    (line, f'The {self.node_filter.node_class}, '
+                           f'{name}, does not follow the specified naming convention.'))
 
         return feedback
 

@@ -96,18 +96,45 @@ def camera_exercise_spec():
         "Each behaviour should be tested using mock objects - there shouldn't be any assertions on the state of the camera",
         "There should be minimal duplication of code between tests."
     ],
-    'Camera.java': [
-        "The Camera class should have a constructor that takes the Sensor and MemoryCard as arguments",
-        "The Camera class should have fields to track the power state of the camera",
-        "No internal state of the Camera class should be exposed to the outside world - notably the power state",
-        "The Camera class should not call the writeComplete() method itself, but should provide an implementation"
-        "writeComplete() should trigger a sensor power down if the camera has been powered off while writing",
-        "The overall implementation should be neat and concise, with minimal duplication of code",
-    ]}
+        'Camera.java': [
+            "The Camera class should have a constructor that takes the Sensor and MemoryCard as arguments",
+            "The Camera class should have fields to track the power state of the camera",
+            "No internal state of the Camera class should be exposed to the outside world - notably the power state",
+            "The Camera class should not call the writeComplete() method itself, but should provide an implementation"
+            "writeComplete() should trigger a sensor power down if the camera has been powered off while writing",
+            "The overall implementation should be neat and concise, with minimal duplication of code",
+        ]}
 
-    additional_files = {} #'src/main/java/ic/doc/camera/WriteListener.java'}
+    additional_files = {}  # 'src/main/java/ic/doc/camera/WriteListener.java'}
 
-    return Spec(task, overview, rules=rules, structures=structures, marking_points=marking_points, additional_files=additional_files)
+    return Spec(task, overview, rules=rules, structures=structures, marking_points=marking_points,
+                additional_files=additional_files)
+
+
+def rul_exercise_spec():
+    task = 'TDD - Recently Used List'
+    overview = ("This idea with this task was to use Test-Drive Development to "
+                "iteratively implement a Recently Used List.")
+    rules = [
+        AccessModifierCheck(scope=('dir', 'src/main/java'),
+                            expected_modifiers=['private']),
+        AccessModifierCheck(scope=('dir', 'src/main/java'), field_type="List",
+                            expected_modifiers=['private', 'final']),
+        MethodWithReturnTypeCheck(scope=('dir', 'src/main/java'), return_type="List"),
+        ClassImplementingInterfaceCheck(scope=('dir', 'src/main/java'), interface_type="List"),
+        ClassExtendingSuperclassCheck(scope=('dir', 'src/main/java'), superclass_type="ArrayList"),
+        IdentifierRule(scope=('dir', 'src/test/java'),
+                       node_filter=JavaFilter(node_class='method', node_annotations=['Test'], node_name=r"^test"),
+                       feedback_msg="Name test methods as facts, don't start them with the word 'test'.")]
+
+    structures = []
+
+    marking_points = {}
+
+    additional_files = set()
+
+    return Spec(task, overview, rules=rules,
+                structures=structures, marking_points=marking_points, additional_files=additional_files)
 
 
 # def build_spec(spec_file):
