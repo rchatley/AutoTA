@@ -1,6 +1,5 @@
-import ast as python_ast
-
 from src.filters.JavaFilter import JavaFilter
+from src.project.Feedback import LineFeedback
 from src.rules.Rule import Rule
 
 
@@ -10,12 +9,12 @@ class AccessModifierCheck(Rule):
         self.expected_modifiers = expected_modifiers
         self.field_type = field_type
 
-    def apply(self, file):
+    def apply(self, file) -> list[LineFeedback]:
         ast = self.file_filter(file)
         if ast is None:
             return []
 
-        feedback = []
+        feedback: list[LineFeedback] = []
         for ast_class in JavaFilter(node_class='class').get_nodes(ast):
             visible_fields = (JavaFilter(node_class='field',
                                          node_type=self.field_type,
@@ -26,8 +25,8 @@ class AccessModifierCheck(Rule):
             for field in visible_fields:
                 line, char = field.position
                 feedback.append(
-                    (line, f'Make the {field.declarators[0].name} '
-                           f'field {" and ".join(self.expected_modifiers)}'))
+                    LineFeedback(line_number=line,
+                                 feedback=f'Make the {field.declarators[0].name} field {" and ".join(self.expected_modifiers)}'))
 
         return feedback
 

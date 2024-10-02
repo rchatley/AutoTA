@@ -52,6 +52,9 @@ def create_feedback_pdf(code_files, task, build_results: BuildResults, commit_ms
 
     for file in code_files:
         feedback_pdf.add_code_with_feedback(file)
+        feedback_pdf.print_gpt_feedback(file)
+
     feedback_pdf.output(f'{name} Task Feedback.pdf')
     print()
     print(f'{name} Task Feedback.pdf created')
+

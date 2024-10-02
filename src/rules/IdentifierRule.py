@@ -1,4 +1,5 @@
 from src.filters.Filter import get_node_name
+from src.project.Feedback import LineFeedback
 from src.rules.Rule import Rule
 
 
@@ -9,7 +10,7 @@ class IdentifierRule(Rule):
         self.feedback_msg = feedback_msg
         self.node_filter = node_filter
 
-    def apply(self, file):
+    def apply(self, file) -> list[LineFeedback]:
         ast = self.file_filter(file)
         if ast is None or self.node_filter is None:
             return []
@@ -24,8 +25,8 @@ class IdentifierRule(Rule):
                     (line, self.feedback_msg))
             else:
                 feedback.append(
-                    (line, f'The {self.node_filter.node_class}, '
-                           f'{name}, does not follow the specified naming convention.'))
+                    LineFeedback(line_number=line,
+                                 feedback=f'The {self.node_filter.node_class}, {name}, does not follow the specified naming convention.'))
 
         return feedback
 

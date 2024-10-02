@@ -1,3 +1,5 @@
+import re
+
 from src.entity_relations.CodeStructure import CodeStructure
 from src.entity_relations.DesignPattern import pattern_library
 from src.entity_relations.ERClasses import Class, Constructor, Field, Interface
@@ -114,7 +116,18 @@ def camera_exercise_spec():
 def rul_exercise_spec():
     task = 'TDD - Recently Used List'
     overview = ("This idea with this task was to use Test-Drive Development to "
-                "iteratively implement a Recently Used List.")
+                "iteratively implement a Recently Used List. We would expect one test class,"
+                "called something like RecentlyUsedListTest, and one class to implement the functionality,"
+                "typically called RecentlyUsedList. We teach that each test method should test a single behaviour,"
+                "and should be as short and clear as possible. We teach that each test method should be named as a fact"
+                "about the behaviour of the class under test, and should not start with the word 'test', 'check' "
+                "or 'should'. The test name should describe the behaviour of the class under test, not the test scenario."
+                "We expect students to use JUnit4 for testing. They should not use the assert keyword. We teach the"
+                "use of hamcrest matchers for clear and readable test code, assertThat(x, is(y)) etc."
+                "We are on the lookout for duplication in the test code, and encourage students to extract common"
+                "setup code into a method - or at least to use a field rather than creating a new object in each test."
+                "We hope not to see any violations of encapsulation, or uses of reflection or similar techniques to"
+                "test private parts. We expect all tests to exercise the public API of the class under test.")
     rules = [
         AccessModifierCheck(scope=('dir', 'src/main/java'),
                             expected_modifiers=['private']),
@@ -129,7 +142,11 @@ def rul_exercise_spec():
 
     structures = []
 
-    marking_points = {}
+    marking_points = {'*Test.java': [
+        "duplication",
+        "concision and clarity",
+        "each test testing a single behaviour"
+    ]}
 
     additional_files = set()
 
@@ -158,3 +175,19 @@ class Spec:
         self.structures = structures
         self.marking_points = marking_points
         self.additional_files = additional_files
+
+    def marking_points_for_file(self, file) -> list[str]:
+        return regex_dict_lookup(self.marking_points, file)
+
+
+def regex_dict_lookup(dictionary: dict[str, list[str]], filename: str) -> list[str]:
+    for key, value in dictionary.items():
+        if key.startswith('*'):
+            if filename.endswith(key[1:]):
+                print(f"Found: key {key} matches file {filename}")
+                return value
+            else:
+                print(f"Key {key} does not match file {filename}")
+        elif key == filename:
+            return value
+    return None

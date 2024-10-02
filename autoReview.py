@@ -3,8 +3,8 @@ import sys
 
 from dotenv import load_dotenv
 
+from src.project.Spec import rul_exercise_spec
 from src.project.Submission import Submission
-from src.project.Spec import camera_exercise_spec
 
 if __name__ == "__main__":
 
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         print("Usage: python autoReview.py [source_directory]")
         sys.exit(1)
 
-    spec = camera_exercise_spec()
+    spec = rul_exercise_spec()
 
     submission = Submission(repo_dir, spec)
 

@@ -6,6 +6,11 @@ from fpdf import FPDF
 
 from src.project.BuildResult import BuildResult
 from src.project.BuildResults import BuildResults
+from src.project.JavaFile import JavaFile
+
+
+def feedback_for_line(line_number, file: JavaFile):
+    return next((feedback.feedback for feedback in file.feedback if feedback.line_number == line_number), None)
 
 
 class FeedbackPDF(FPDF):
@@ -74,13 +79,12 @@ class FeedbackPDF(FPDF):
         self.set_font('Courier', '', 8)
         self.set_text_color(0, 0, 0)
 
-        feedback_dict = {line_num: fb for line_num, fb in file.feedback}
         code_lines = file.contents.split('\n')
 
         for i, line in enumerate(code_lines):
             line_number = f'{i + 1:4}: '
             line_text = line_number + ''.join(map(str, line)).replace("\r", '')
-            line_feedback = feedback_dict.get(i + 1)
+            line_feedback = feedback_for_line(i + 1, file)
             width = self.w / 2
             if line_feedback:
                 with self.highlight(line_feedback, modification_time=None, color=(1, 1, 0)):
@@ -89,6 +93,9 @@ class FeedbackPDF(FPDF):
                 self.cell(width, self.line_height, line_text, border=0, ln=1)
 
     def print_gpt_feedback(self, file):
+        if file.gpt_feedback is None or len(file.gpt_feedback) == 0:
+            return
+
         self.set_font('DejaVu', '', 10)
         page_width = self.w
         cell_width = (page_width / 2) - 10
@@ -96,7 +103,8 @@ class FeedbackPDF(FPDF):
         y_position = 20
         self.set_xy(x_position, y_position)
         self.set_text_color(255, 0, 0)
-        self.multi_cell(cell_width, self.line_height, file.gpt_feedback)
+        self.multi_cell(cell_width, self.line_height, "\n\n".join(file.gpt_feedback))
+        self.set_text_color(0, 0, 0)
 
     def comment_on(self, build_results: BuildResults, other_comments: List[str] = None):
 

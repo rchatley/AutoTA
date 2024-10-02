@@ -1,6 +1,7 @@
 import ast as python_ast
 
 from src.filters.JavaFilter import JavaFilter
+from src.project.Feedback import LineFeedback
 from src.rules.Rule import Rule
 
 
@@ -10,12 +11,12 @@ class MethodWithReturnTypeCheck(Rule):
         self.expected_modifiers = expected_modifiers
         self.return_type = return_type
 
-    def apply(self, file):
+    def apply(self, file) -> list[LineFeedback]:
         ast = self.file_filter(file)
         if ast is None:
             return []
 
-        feedback = []
+        feedback: list[LineFeedback] = []
         for ast_class in JavaFilter(node_class='class').get_nodes(ast):
             methods_matching = (JavaFilter(node_class='method',
                                            node_return_type=self.return_type,
@@ -24,9 +25,9 @@ class MethodWithReturnTypeCheck(Rule):
 
             for method in methods_matching:
                 line, char = method.position
-                feedback.append(
-                    (line, f'The method {method.name} '
-                           f'exposes internal state - keep it encapsulated.'))
+                feedback.append(LineFeedback(
+                    line_number=line,
+                    feedback=f'The method {method.name} exposes internal state - keep it encapsulated.'))
 
         return feedback
 

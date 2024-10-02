@@ -1,6 +1,7 @@
 import javalang
 
 from src.filters.JavaFilter import JavaFilter
+from src.project.Feedback import LineFeedback
 from src.rules.Rule import Rule
 
 
@@ -20,20 +21,20 @@ class JMockSugarCheck(Rule):
     def __init__(self, scope='project'):
         super().__init__(scope)
 
-    def apply(self, file):
+    def apply(self, file) -> list[LineFeedback]:
         ast = self.file_filter(file)
         if ast is None:
             return []
 
-        feedback = []
+        feedback: list[LineFeedback] = []
         for ast_class in JavaFilter(node_class='class').get_nodes(ast):
 
             exactly_zero_calls = find_calls(ast_class, "exactly", 0)
 
             for call in exactly_zero_calls:
                 line, char = call.position
-                feedback.append(
-                    (line, 'It would be neater to use never() instead of exactly(0)'))
+                feedback.append(LineFeedback(line_number=line,
+                                             feedback='It would be neater to use never() instead of exactly(0)'))
 
         return feedback
 

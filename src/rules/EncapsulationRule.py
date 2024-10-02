@@ -1,6 +1,7 @@
 import ast as python_ast
 
 from src.filters.JavaFilter import JavaFilter
+from src.project.Feedback import LineFeedback
 from src.rules.Rule import Rule
 
 
@@ -9,12 +10,12 @@ class EncapsulationRule(Rule):
     def __init__(self, scope='project'):
         super().__init__(scope)
 
-    def apply(self, file):
+    def apply(self, file) -> list[LineFeedback]:
         ast = self.file_filter(file)
         if ast is None:
             return []
 
-        feedback = []
+        feedback: list[LineFeedback] = []
         for ast_class in JavaFilter(node_class='class').get_nodes(ast):
             visible_fields = JavaFilter(node_class='field',
                                         node_modifiers=['private'],
@@ -24,8 +25,8 @@ class EncapsulationRule(Rule):
             for field in visible_fields:
                 line, char = field.position
                 feedback.append(
-                    (line, f'The {field.declarators[0].name} '
-                           f'field should be private'))
+                    LineFeedback(line_number=line,
+                                 feedback=f'The {field.declarators[0].name} field should be private'))
 
         return feedback
 

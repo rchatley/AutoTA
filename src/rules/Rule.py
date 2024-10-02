@@ -1,6 +1,8 @@
 import abc
 import os
 
+from src.project.Feedback import LineFeedback
+
 
 class Rule:
     def __init__(self, scope='project'):
@@ -27,5 +29,5 @@ class Rule:
         return file.ast
 
     @abc.abstractmethod
-    def apply(self, review_file):
+    def apply(self, review_file) -> list[LineFeedback]:
         return NotImplementedError

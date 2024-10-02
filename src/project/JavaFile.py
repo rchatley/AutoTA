@@ -3,10 +3,13 @@ import os
 import javalang as java_ast
 from javalang.tree import CompilationUnit
 
+from src.project.Feedback import LineFeedback
+
 
 class JavaFile:
 
     ast: CompilationUnit
+    feedback: list[LineFeedback]
 
     def __init__(self, root, file_path: str, contents=None):
         self.root = root
@@ -31,3 +34,8 @@ class JavaFile:
 
     def package_name(self) -> str:
         return self.ast.package.name if hasattr(self.ast, 'package') else None
+
+    def contents_with_line_numbers(self):
+        lines = self.contents.split('\n')
+        return '\n'.join([f'{i + 1}: {line}' for i, line in enumerate(lines)])
+

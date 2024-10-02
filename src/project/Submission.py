@@ -1,14 +1,17 @@
 import os
 import subprocess
 
+
 from git import Repo
 from openai import OpenAI
+from pydantic import BaseModel
 
 from src.entity_relations import JavaGraph
 from src.entity_relations.CodeStructure import SearchResult
 from src.entity_relations.JavaGraph import build_code_graph, print_graph
 from src.project.BuildResult import BuildResult
 from src.project.BuildResults import BuildResults
+from src.project.Feedback import FileFeedback
 from src.project.JavaFile import JavaFile
 from src.project.Spec import Spec
 from src.project.utils import create_feedback_pdf, gpt_api_request
@@ -172,13 +175,12 @@ class Submission:
     def perform_analysis(self, api_key):
         self.rules_feedback = []
         self.structure_feedback = []
-        self.gpt_feedback = []
         if self.spec.rules is not None:
             self.rules_feedback = self.apply_rules()
         # if self.spec.structures is not None:
         #     self.structure_feedback = self.find_structures()
-        # if self.spec.marking_points is not None:
-        #     self.gpt_feedback = self.ask_gpt(api_key)
+        if self.spec.marking_points is not None:
+            self.ask_gpt(api_key)
 
     def apply_rules(self):
         complete_feedback = ["CODE STYLE RULES:"]
@@ -209,30 +211,36 @@ class Submission:
         client = OpenAI(api_key=api_key)
 
         for file in self.edited_files:
-            feedback_points = self.spec.marking_points.get(file.file_name)
+            feedback_points = self.spec.marking_points_for_file(file.file_name)
 
             if feedback_points is not None:
 
-                # Step 4: Combine the code and questions into a single prompt
                 ta_prompt = (
-                    f"Here is some Java code written by a student as a solution to an assignment:\n\n{file.contents}"
-                    f"\n\nPlease consider the code in relation to the following statements. "
-                    f"Then give a paragraph of feedback to the student "
-                    f"in the style of a helpful university teaching assistant."
-                    f"We won't show the students the points we're checking for, "
-                    f"just your feedback, so please make the feedback self contained. Be critical but constructive.\n\n")
+                    f"Here is part of the Java code written by a student as a solution to an assignment:\n\n{file.contents_with_line_numbers()}\n\n"
+                    f"Here is a description of what we are looking for in this assignment:\n\n{self.spec.overview}\n\n"
+                    f"Your job is to give feedback to the student."
+                    f"Given this context, make comments on the code, particularly about the following:\n")
 
                 for i, marking_point in enumerate(feedback_points, 1):
-                    ta_prompt += f"{i}. {marking_point}\n"
+                    ta_prompt += f"- {marking_point}\n"
 
-                response = client.chat.completions.create(model="gpt-4o",
-                                                          messages=[
-                                                              {"role": "system",
-                                                               "content": "You are an expert Java programmer acting as a teaching assistant for a university course on software design. Your character is to be critical but fair."},
-                                                              {"role": "user", "content": ta_prompt}
-                                                          ])
+                response = client.beta.chat.completions.parse(
+                    model="gpt-4o-2024-08-06",
+                    messages=[
+                      {"role": "system",
+                       "content": "You are an expert Java programmer acting as a "
+                                  "teaching assistant for a university course on "
+                                  "software design. Your character is to be kind"
+                                  "and fair, while still being critical."
+                      },
+                      {"role": "user", "content": ta_prompt}],
+                    response_format=FileFeedback)
 
-                file.gpt_feedback = response.choices[0].message.content
+                line_by_line_feedback = response.choices[0].message.parsed.line_feedback
+                file.feedback.extend(line_by_line_feedback)
+
+                # for line_feedback in line_by_line_feedback:
+                #     print(f"File: {file.file_name}, Line: {line_feedback.line}: {line_feedback.feedback}")
 
     def find_structures(self):
         structure_feedback = []
